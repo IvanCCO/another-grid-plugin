@@ -22,8 +22,6 @@ type OverlayUi = {
   axisMenu: HTMLDivElement;
   adjustTrigger: HTMLButtonElement;
   adjustPopover: HTMLDivElement;
-  moreTrigger: HTMLButtonElement;
-  morePopover: HTMLDivElement;
   closeTrigger: HTMLButtonElement;
   countValue: HTMLSpanElement;
   sizeLabel: HTMLSpanElement;
@@ -54,7 +52,7 @@ const AXIS_OPTIONS: Array<{
 let overlayUi: OverlayUi | null = null;
 let currentSettings = DEFAULT_SETTINGS;
 let resizeFrame = 0;
-let activePopover: 'axis' | 'adjust' | 'more' | null = null;
+let activePopover: 'axis' | 'adjust' | null = null;
 let isDocumentEventsBound = false;
 const PERSIST_DELAY_MS = 250;
 let persistTimer = 0;
@@ -183,6 +181,29 @@ function createColorField(): {
   return { field, colorInput, opacityInput, opacityValue };
 }
 
+function createSection(title: string, subtitle: string): HTMLDivElement {
+  const section = document.createElement('div');
+  section.className = 'grid-ui__section-copy';
+
+  const heading = document.createElement('strong');
+  heading.className = 'grid-ui__section-title';
+  heading.textContent = title;
+
+  const text = document.createElement('span');
+  text.className = 'grid-ui__section-subtitle';
+  text.textContent = subtitle;
+
+  section.append(heading, text);
+  return section;
+}
+
+function createDivider(): HTMLDivElement {
+  const divider = document.createElement('div');
+  divider.className = 'grid-ui__divider';
+  divider.setAttribute('aria-hidden', 'true');
+  return divider;
+}
+
 function ensureOverlayUi(): OverlayUi {
   if (overlayUi?.root.isConnected) {
     return overlayUi;
@@ -213,23 +234,12 @@ function ensureOverlayUi(): OverlayUi {
   const axisTriggerIcon = axisTrigger.firstChild as HTMLSpanElement;
 
   const adjustTrigger = createButton(
-    'Adjust grid density',
+    'Adjust grid settings',
     createIcon('dimension.svg', 'grid-ui__button-icon'),
   );
   adjustTrigger.classList.add('grid-ui__anchor', 'grid-ui__anchor--center');
   adjustTrigger.setAttribute('aria-haspopup', 'dialog');
   adjustTrigger.setAttribute('aria-expanded', 'false');
-
-  const moreDots = document.createElement('span');
-  moreDots.className = 'grid-ui__dots';
-  moreDots.textContent = '...';
-  const moreTrigger = document.createElement('button');
-  moreTrigger.type = 'button';
-  moreTrigger.className = 'grid-ui__button grid-ui__anchor grid-ui__anchor--end';
-  moreTrigger.setAttribute('aria-label', 'Open general settings');
-  moreTrigger.setAttribute('aria-haspopup', 'dialog');
-  moreTrigger.setAttribute('aria-expanded', 'false');
-  moreTrigger.appendChild(moreDots);
 
   const closeTrigger = document.createElement('button');
   closeTrigger.type = 'button';
@@ -246,22 +256,10 @@ function ensureOverlayUi(): OverlayUi {
   adjustPopover.className = 'grid-ui__popover';
   adjustPopover.dataset.popover = 'adjust';
 
-  const morePopover = document.createElement('div');
-  morePopover.className = 'grid-ui__popover';
-  morePopover.dataset.popover = 'more';
-
   const countField = createSliderField('Count', 1, 24, DEFAULT_SETTINGS.count);
   const sizeField = createSliderField('Width', 1, 400, DEFAULT_SETTINGS.size);
   const marginField = createSliderField('Margin', 0, 240, DEFAULT_SETTINGS.margin);
   const gutterField = createSliderField('Gutter', 0, 240, DEFAULT_SETTINGS.gutter);
-
-  adjustPopover.append(
-    createPopoverHeader('Adjust grid', 'Density and spacing'),
-    countField.field,
-    sizeField.field,
-    marginField.field,
-    gutterField.field,
-  );
 
   const distributionField = createSelectField('Distribution');
   const colorField = createColorField();
@@ -280,15 +278,22 @@ function ensureOverlayUi(): OverlayUi {
   });
 
   generalActions.appendChild(resetButton);
-  morePopover.append(
-    createPopoverHeader('General settings', 'Appearance and layout'),
+  adjustPopover.append(
+    createPopoverHeader('Adjust grid', 'Density, spacing and appearance'),
+    createSection('Density', 'Quick sizing controls'),
+    countField.field,
+    sizeField.field,
+    marginField.field,
+    gutterField.field,
+    createDivider(),
+    createSection('Appearance', 'Layout and color'),
     distributionField.field,
     colorField.field,
     generalActions,
   );
 
-  controller.append(axisTrigger, adjustTrigger, moreTrigger, closeTrigger);
-  root.append(gridLayer, controller, axisMenu, adjustPopover, morePopover);
+  controller.append(axisTrigger, adjustTrigger, closeTrigger);
+  root.append(gridLayer, controller, axisMenu, adjustPopover);
   (document.body ?? document.documentElement).appendChild(root);
 
   root.addEventListener('pointerleave', () => {
@@ -312,10 +317,6 @@ function ensureOverlayUi(): OverlayUi {
 
   adjustTrigger.addEventListener('click', () => {
     togglePopover('adjust');
-  });
-
-  moreTrigger.addEventListener('click', () => {
-    togglePopover('more');
   });
 
   closeTrigger.addEventListener('click', () => {
@@ -362,8 +363,6 @@ function ensureOverlayUi(): OverlayUi {
     axisMenu,
     adjustTrigger,
     adjustPopover,
-    moreTrigger,
-    morePopover,
     closeTrigger,
     countValue: countField.valueEl,
     sizeLabel: sizeField.field.querySelector('.grid-ui__field-label') as HTMLSpanElement,
@@ -423,7 +422,6 @@ function setActivePopover(next: typeof activePopover): void {
   const popovers: Array<[typeof activePopover, HTMLDivElement, HTMLButtonElement]> = [
     ['axis', ui.axisMenu, ui.axisTrigger],
     ['adjust', ui.adjustPopover, ui.adjustTrigger],
-    ['more', ui.morePopover, ui.moreTrigger],
   ];
 
   for (const [name, popover, trigger] of popovers) {
@@ -446,7 +444,7 @@ function positionPopover(
   trigger: HTMLButtonElement,
 ): void {
   const rect = trigger.getBoundingClientRect();
-  const width = 280;
+  const width = 304;
   const gap = 10;
   const viewportPadding = 12;
 

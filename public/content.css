@@ -113,13 +113,6 @@
   transform: rotate(var(--grid-icon-rotation, 0deg));
 }
 
-.grid-ui__dots {
-  font-size: 18px;
-  line-height: 1;
-  letter-spacing: 0.08em;
-  transform: translateY(-2px);
-}
-
 .grid-ui__close {
   position: absolute;
   top: -6px;
@@ -146,10 +139,10 @@
 
 .grid-ui__popover {
   position: fixed;
-  width: 280px;
+  width: 304px;
   display: grid;
-  gap: 12px;
-  padding: 14px;
+  gap: 14px;
+  padding: 16px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 18px;
   background: var(--grid-ui-panel);
@@ -174,7 +167,7 @@
 
 .grid-ui__popover-header {
   display: grid;
-  gap: 4px;
+  gap: 5px;
 }
 
 .grid-ui__popover-title {
@@ -186,6 +179,30 @@
   color: var(--grid-ui-muted);
   font-size: 11px;
   line-height: 1.35;
+}
+
+.grid-ui__section-copy {
+  display: grid;
+  gap: 3px;
+}
+
+.grid-ui__section-title {
+  font-size: 11px;
+  line-height: 1.1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.grid-ui__section-subtitle {
+  color: var(--grid-ui-muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.grid-ui__divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .grid-ui__menu-item {
@@ -288,10 +305,12 @@
 
 .grid-ui__actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: stretch;
 }
 
 .grid-ui__text-button {
+  width: 100%;
+  justify-content: center;
   padding: 8px 12px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.06);
