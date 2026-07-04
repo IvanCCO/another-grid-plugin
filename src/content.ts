@@ -73,14 +73,20 @@ type OverlayUi = {
   patternVariationSection: HTMLDivElement;
   patternPresetSection: HTMLDivElement;
   adjustAxisGroup: HTMLDivElement;
+  layoutSection: HTMLDivElement;
+  typeSectionTitle: HTMLElement;
+  measurementsSection: HTMLDivElement;
   distributionGroup: HTMLDivElement;
   closeTrigger: HTMLButtonElement;
-  countValue: HTMLSpanElement;
+  countField: HTMLLabelElement;
   sizeField: HTMLLabelElement;
   sizeLabel: HTMLSpanElement;
   sizeValue: HTMLSpanElement;
+  marginField: HTMLLabelElement;
   marginValue: HTMLSpanElement;
+  gutterField: HTMLLabelElement;
   gutterValue: HTMLSpanElement;
+  countValue: HTMLSpanElement;
   opacityValue: HTMLSpanElement;
   countRange: HTMLInputElement;
   sizeRange: HTMLInputElement;
@@ -228,9 +234,11 @@ function ensureOverlayUi(): OverlayUi {
 
   const layoutSection = document.createElement('div');
   layoutSection.className = 'grid-ui__layout-section';
+  const typeColumn = createLayoutColumn('TYPE', distributionGroup);
+  const typeSectionTitle = typeColumn.querySelector('.grid-ui__section-title') as HTMLElement;
   layoutSection.append(
     createLayoutColumn('Layout', adjustAxisGroup),
-    createLayoutColumn('TYPE', distributionGroup),
+    typeColumn,
   );
 
   const countField = createSliderField('Count', 1, 24, DEFAULT_SETTINGS.count);
@@ -243,11 +251,13 @@ function ensureOverlayUi(): OverlayUi {
   const popoverHeader = createPopoverHeader();
   const patternPicker = createPatternPicker();
 
+  const measurementsSection = createSection('Measurements');
+
   adjustPopover.append(
     popoverHeader.header,
     patternPicker.field,
     layoutSection,
-    createSection('Measurements'),
+    measurementsSection,
     countField.field,
     sizeField.field,
     marginField.field,
@@ -473,14 +483,20 @@ function ensureOverlayUi(): OverlayUi {
     patternVariationSection: patternPicker.variationSection,
     patternPresetSection: patternPicker.presetSection,
     adjustAxisGroup,
+    layoutSection,
+    typeSectionTitle,
+    measurementsSection,
     distributionGroup,
     closeTrigger,
-    countValue: countField.valueEl,
+    countField: countField.field,
     sizeField: sizeField.field,
     sizeLabel: sizeField.field.querySelector('.grid-ui__field-label') as HTMLSpanElement,
     sizeValue: sizeField.valueEl,
+    marginField: marginField.field,
     marginValue: marginField.valueEl,
+    gutterField: gutterField.field,
     gutterValue: gutterField.valueEl,
+    countValue: countField.valueEl,
     opacityValue: colorField.opacityValue,
     countRange: countField.input,
     sizeRange: sizeField.input,
@@ -571,7 +587,17 @@ function positionPopover(
 }
 
 function updateSizeAvailability(ui: OverlayUi, settings: GridSettings): void {
-  ui.sizeField.hidden = settings.distribution === 'stretch';
+  ui.sizeField.hidden = settings.axis !== 'grid' && settings.distribution === 'stretch';
+}
+
+function updatePopoverVisibility(ui: OverlayUi, settings: GridSettings): void {
+  const gridMode = settings.axis === 'grid';
+
+  ui.measurementsSection.hidden = gridMode;
+  ui.typeSectionTitle.hidden = gridMode;
+  ui.countField.hidden = gridMode;
+  ui.marginField.hidden = gridMode;
+  ui.gutterField.hidden = gridMode;
 }
 
 function renderController(settings: GridSettings): void {
@@ -676,6 +702,7 @@ function renderController(settings: GridSettings): void {
   ui.gutterValue.textContent = String(settings.gutter);
   ui.opacityValue.textContent = `${settings.opacity}%`;
   updateSizeAvailability(ui, settings);
+  updatePopoverVisibility(ui, settings);
 
   if (activePopover === 'adjust') {
     positionPopover('adjust', ui.adjustPopover, ui.adjustTrigger);

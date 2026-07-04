@@ -90,27 +90,19 @@ export function applyRowsGrid(root: HTMLDivElement, settings: GridSettings): voi
 }
 
 export function applySquareGrid(root: HTMLDivElement, settings: GridSettings): void {
-  const frame = createFrame(settings);
-  const fill = toRgba(settings.color, settings.opacity);
+  const frame = document.createElement('div');
+  const lineColor = toRgba(settings.color, settings.opacity);
+  const spacing = Math.max(settings.size, 1);
 
-  if (settings.distribution === 'stretch') {
-    frame.style.inset = `${settings.margin}px`;
-    frame.style.gridTemplateColumns = `repeat(${settings.count}, minmax(0, 1fr))`;
-    frame.style.gridTemplateRows = `repeat(${settings.count}, minmax(0, 1fr))`;
-  } else {
-    const span = getFixedTrackSpan(settings);
-    const availableWidth = Math.max(window.innerWidth - settings.margin * 2, 0);
-    const availableHeight = Math.max(window.innerHeight - settings.margin * 2, 0);
+  frame.style.position = 'absolute';
+  frame.style.inset = '0';
+  frame.style.pointerEvents = 'none';
+  frame.style.backgroundImage = [
+    `linear-gradient(to right, ${lineColor} 1px, transparent 1px)`,
+    `linear-gradient(to bottom, ${lineColor} 1px, transparent 1px)`,
+  ].join(', ');
+  frame.style.backgroundSize = `${spacing}px ${spacing}px`;
 
-    frame.style.left = `${Math.max((window.innerWidth - span) / 2, settings.margin)}px`;
-    frame.style.top = `${Math.max((window.innerHeight - span) / 2, settings.margin)}px`;
-    frame.style.width = `${Math.min(span, availableWidth)}px`;
-    frame.style.height = `${Math.min(span, availableHeight)}px`;
-    frame.style.gridTemplateColumns = `repeat(${settings.count}, ${settings.size}px)`;
-    frame.style.gridTemplateRows = `repeat(${settings.count}, ${settings.size}px)`;
-  }
-
-  appendTracks(frame, settings.count * settings.count, fill);
   root.appendChild(frame);
 }
 

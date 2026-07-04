@@ -112,31 +112,31 @@ const PRESET_DEFINITIONS: PresetDefinition[] = [
     id: 'preset-grid-modular-4',
     name: 'Modular 4',
     axis: 'grid',
-    settings: { count: 4, margin: 16, gutter: 8, distribution: 'stretch', size: 4 },
+    settings: { size: 4, distribution: 'stretch' },
   },
   {
     id: 'preset-grid-modular-8',
     name: 'Modular 8',
     axis: 'grid',
-    settings: { count: 8, margin: 16, gutter: 8, distribution: 'stretch', size: 8 },
+    settings: { size: 8, distribution: 'stretch' },
   },
   {
     id: 'preset-grid-modular-12',
     name: 'Modular 12',
     axis: 'grid',
-    settings: { count: 12, margin: 20, gutter: 12, distribution: 'stretch', size: 12 },
+    settings: { size: 12, distribution: 'stretch' },
   },
   {
     id: 'preset-grid-modular-16',
     name: 'Modular 16',
     axis: 'grid',
-    settings: { count: 16, margin: 24, gutter: 16, distribution: 'stretch', size: 16 },
+    settings: { size: 16, distribution: 'stretch' },
   },
   {
     id: 'preset-grid-modular-24',
     name: 'Modular 24',
     axis: 'grid',
-    settings: { count: 24, margin: 24, gutter: 24, distribution: 'stretch', size: 24 },
+    settings: { size: 24, distribution: 'stretch' },
   },
 ];
 

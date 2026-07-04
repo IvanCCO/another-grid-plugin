@@ -84,32 +84,21 @@ describe('renderGrid', () => {
     expect(frame.style.gridTemplateRows).toBe('repeat(2, 40px)');
   });
 
-  it('renders a square grid with count*count tracks', () => {
+  it('renders a line grid stretched across the viewport', () => {
     renderGrid(root, {
       ...DEFAULT_SETTINGS,
       axis: 'grid',
       distribution: 'stretch',
-      count: 3,
+      size: 70,
+      color: '#FF0000',
+      opacity: 50,
     });
     const frame = root.firstElementChild as HTMLDivElement;
-    expect(frame.children).toHaveLength(9);
-    expect(frame.style.gridTemplateColumns).toBe('repeat(3, minmax(0, 1fr))');
-    expect(frame.style.gridTemplateRows).toBe('repeat(3, minmax(0, 1fr))');
-  });
-
-  it('centers a fixed-size square grid around the viewport midpoint', () => {
-    renderGrid(root, {
-      ...DEFAULT_SETTINGS,
-      axis: 'grid',
-      distribution: 'center',
-      count: 2,
-      size: 100,
-      gutter: 0,
-      margin: 0,
-    });
-    const frame = root.firstElementChild as HTMLDivElement;
-    expect(frame.style.left).toBe('400px');
-    expect(frame.style.top).toBe('300px');
+    expect(frame.children).toHaveLength(0);
+    expect(frame.style.inset).toBe('0px');
+    expect(frame.style.backgroundSize).toBe('70px 70px');
+    expect(frame.style.backgroundImage).toContain('linear-gradient');
+    expect(frame.style.backgroundImage).toContain('rgba(255, 0, 0, 0.5)');
   });
 
   it('fills every track with the requested rgba color', () => {

@@ -151,7 +151,7 @@ describe('renderDistributionGroup', () => {
   it('renders only the distribution options supported for the axis', () => {
     const group = document.createElement('div');
     renderDistributionGroup(group, 'grid', 'stretch', vi.fn());
-    expect(group.querySelectorAll('.grid-ui__distribution-option')).toHaveLength(2);
+    expect(group.querySelectorAll('.grid-ui__distribution-option')).toHaveLength(0);
   });
 
   it('marks the current distribution as pressed and calls onSelect on click', () => {

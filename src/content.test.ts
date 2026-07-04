@@ -313,11 +313,40 @@ describe('background/popup messaging', () => {
 
     emitMessage({
       type: GRID_MESSAGE_TYPE,
-      settings: { ...DEFAULT_SETTINGS, axis: 'grid', count: 3 },
+      settings: { ...DEFAULT_SETTINGS, axis: 'grid', size: 70 },
     });
 
     const frame = (overlay.querySelector('.grid-ui__layer') as HTMLElement).firstElementChild as HTMLElement;
-    expect(frame.children).toHaveLength(9);
+    expect(frame.style.backgroundSize).toBe('70px 70px');
+  });
+
+  it('shows only size and color controls in grid mode', async () => {
+    const { emitMessage } = await loadContentScript();
+    const overlay = getOverlay();
+
+    emitMessage({
+      type: GRID_MESSAGE_TYPE,
+      settings: { ...DEFAULT_SETTINGS, axis: 'grid', size: 70 },
+    });
+
+    const adjustTrigger = overlay.querySelector('.grid-ui__anchor--center') as HTMLButtonElement;
+    adjustTrigger.click();
+
+    expect(overlay.querySelector('.grid-ui__layout-section')?.hidden).toBe(false);
+    expect(overlay.querySelector('.grid-ui__distribution-group')?.children).toHaveLength(0);
+    const typeTitle = Array.from(overlay.querySelectorAll('.grid-ui__section-title')).find(
+      (title) => title.textContent === 'TYPE',
+    );
+    expect(typeTitle?.hidden).toBe(true);
+    expect(overlay.querySelector('.grid-ui__section-copy')?.hidden).toBe(true);
+    expect(overlay.querySelector('.grid-ui__field--slider input[min="1"][max="24"]')?.closest('label')?.hidden).toBe(true);
+    expect(overlay.querySelector('.grid-ui__field--slider input[min="0"][max="240"]')?.closest('label')?.hidden).toBe(true);
+
+    const sizeField = Array.from(overlay.querySelectorAll('.grid-ui__field-label')).find(
+      (label) => label.textContent === 'Size',
+    )?.closest('label');
+    expect(sizeField?.hidden).toBe(false);
+    expect(overlay.querySelector('.grid-ui__field--slider--color')?.hidden).toBe(false);
   });
 
   it('ignores messages with an unrelated type', async () => {

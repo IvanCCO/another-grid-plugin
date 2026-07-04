@@ -52,10 +52,14 @@ describe('normalizeSettings', () => {
       normalizeSettings({
         axis: 'grid',
         distribution: 'center',
+        margin: 24,
+        gutter: 16,
       }),
     ).toMatchObject({
       axis: 'grid',
-      distribution: 'center',
+      distribution: 'stretch',
+      margin: 0,
+      gutter: 0,
     });
   });
 });
@@ -64,7 +68,7 @@ describe('grid metadata', () => {
   it('returns the correct label and options for each axis', () => {
     expect(getSizeLabel('columns')).toBe('Width');
     expect(getSizeLabel('rows')).toBe('Height');
-    expect(getSizeLabel('grid')).toBe('Cell');
+    expect(getSizeLabel('grid')).toBe('Size');
     expect(getDistributionOptions('columns').map(({ value }) => value)).toEqual([
       'stretch',
       'center',
@@ -77,10 +81,7 @@ describe('grid metadata', () => {
       'top',
       'bottom',
     ]);
-    expect(getDistributionOptions('grid').map(({ value }) => value)).toEqual([
-      'stretch',
-      'center',
-    ]);
+    expect(getDistributionOptions('grid').map(({ value }) => value)).toEqual([]);
   });
 
   it('computes fixed spans and overlay colors', () => {

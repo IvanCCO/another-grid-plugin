@@ -109,10 +109,7 @@ export function getDistributionOptions(
   axis: GridAxis,
 ): Array<{ value: GridDistribution; label: string }> {
   if (axis === 'grid') {
-    return [
-      { value: 'stretch', label: 'Stretch' },
-      { value: 'center', label: 'Center' },
-    ];
+    return [];
   }
 
   if (axis === 'rows') {
@@ -138,7 +135,7 @@ export function getSizeLabel(axis: GridAxis): string {
   }
 
   if (axis === 'grid') {
-    return 'Cell';
+    return 'Size';
   }
 
   return 'Width';
@@ -163,6 +160,10 @@ export function normalizeSettings(value: unknown): GridSettings {
       : {};
 
   const axis = normalizeAxis(source.axis);
+  const distribution =
+    axis === 'grid'
+      ? 'stretch'
+      : normalizeDistribution(source.distribution, axis);
 
   return {
     enabled:
@@ -187,22 +188,28 @@ export function normalizeSettings(value: unknown): GridSettings {
       MIN_OPACITY,
       MAX_OPACITY,
     ),
-    distribution: normalizeDistribution(source.distribution, axis),
+    distribution,
     size: clamp(
       Math.round(parseNumber(source.size, DEFAULT_SETTINGS.size)),
       MIN_SIZE,
       MAX_SIZE,
     ),
-    margin: clamp(
-      Math.round(parseNumber(source.margin, DEFAULT_SETTINGS.margin)),
-      MIN_SPACING,
-      MAX_SPACING,
-    ),
-    gutter: clamp(
-      Math.round(parseNumber(source.gutter, DEFAULT_SETTINGS.gutter)),
-      MIN_SPACING,
-      MAX_SPACING,
-    ),
+    margin:
+      axis === 'grid'
+        ? 0
+        : clamp(
+            Math.round(parseNumber(source.margin, DEFAULT_SETTINGS.margin)),
+            MIN_SPACING,
+            MAX_SPACING,
+          ),
+    gutter:
+      axis === 'grid'
+        ? 0
+        : clamp(
+            Math.round(parseNumber(source.gutter, DEFAULT_SETTINGS.gutter)),
+            MIN_SPACING,
+            MAX_SPACING,
+          ),
   };
 }
 
