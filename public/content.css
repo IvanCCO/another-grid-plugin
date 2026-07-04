@@ -366,18 +366,22 @@
   --grid-ui-slider-fill: var(--grid-ui-orange-soft);
   --grid-ui-slider-sheen: var(--grid-ui-orange-sheen);
   --slider-percent: 0;
-  --slider-scale: 0;
   position: relative;
-  min-height: 56px;
+  min-height: 46px;
   padding: 0;
   border: 1px solid var(--grid-ui-border);
-  border-radius: 16px;
+  border-radius: 14px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.72)),
-    rgba(255, 255, 255, 0.6);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)),
+    rgba(28, 28, 30, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
   overflow: hidden;
   cursor: ew-resize;
   isolation: isolate;
+  transition:
+    border-color 160ms ease,
+    box-shadow 180ms var(--grid-ui-ease-out),
+    transform 140ms var(--grid-ui-ease-out);
 }
 
 .grid-ui__field--slider[data-disabled='true'] {
@@ -385,19 +389,22 @@
   --grid-ui-slider-sheen: rgba(0, 0, 0, 0.02);
   border-color: rgba(0, 0, 0, 0.05);
   background: rgba(0, 0, 0, 0.02);
+  box-shadow: none;
   cursor: default;
 }
 
 .grid-ui__field--slider::before {
   content: '';
   position: absolute;
-  inset: 4px;
-  border-radius: 12px;
-  background: linear-gradient(90deg, var(--grid-ui-slider-fill), var(--grid-ui-slider-sheen));
-  transform: scaleX(var(--slider-scale));
-  transform-origin: left center;
-  transition: transform 180ms var(--grid-ui-ease-out);
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04)),
+    linear-gradient(135deg, var(--grid-ui-slider-fill), var(--grid-ui-slider-sheen));
+  clip-path: inset(0 calc(100% - (var(--slider-percent) * 1%)) 0 0 round 14px);
+  transition: clip-path 180ms var(--grid-ui-ease-out);
   z-index: 0;
+  pointer-events: none;
 }
 
 .grid-ui__field--slider[data-disabled='true']::before {
@@ -418,15 +425,19 @@
   grid-template-columns: auto minmax(72px, 1fr) auto;
   align-items: center;
   gap: 14px;
-  min-height: 56px;
-  padding: 0 16px;
+  min-height: 46px;
+  padding: 0 14px;
 }
 
 .grid-ui__slider-ruler {
   position: relative;
-  height: 24px;
+  height: 18px;
   border-radius: 999px;
-  opacity: 0.66;
+  opacity: 0;
+  transform: scaleX(0.985);
+  transition:
+    opacity 140ms var(--grid-ui-ease-out),
+    transform 180ms var(--grid-ui-ease-out);
 }
 
 .grid-ui__slider-ruler::before,
@@ -442,7 +453,7 @@
     repeating-linear-gradient(
       90deg,
       transparent 0 11px,
-      rgba(28, 28, 30, 0.14) 11px 12px
+      rgba(255, 255, 255, 0.22) 11px 12px
     );
 }
 
@@ -451,7 +462,7 @@
     repeating-linear-gradient(
       90deg,
       transparent 0 55px,
-      rgba(28, 28, 30, 0.22) 55px 57px
+      rgba(255, 255, 255, 0.34) 55px 57px
     );
 }
 
@@ -460,17 +471,20 @@
   top: 50%;
   left: clamp(20px, calc(var(--slider-percent) * 1%), calc(100% - 20px));
   z-index: 1;
-  width: 6px;
-  height: 38px;
+  width: 5px;
+  height: 26px;
   border-radius: 999px;
-  background: rgba(28, 28, 30, 0.82);
+  background: rgba(28, 28, 30, 0.7);
   box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.08),
-    0 8px 16px rgba(0, 0, 0, 0.12);
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 6px 14px rgba(0, 0, 0, 0.18);
   transform: translate(-50%, -50%);
   transition:
     left 180ms var(--grid-ui-ease-out),
-    background 160ms ease;
+    background 160ms ease,
+    height 160ms var(--grid-ui-ease-out),
+    box-shadow 180ms var(--grid-ui-ease-out),
+    transform 140ms var(--grid-ui-ease-out);
   pointer-events: none;
 }
 
@@ -482,14 +496,14 @@
 }
 
 .grid-ui__field-label {
-  color: var(--grid-ui-text);
+  color: rgba(255, 255, 255, 0.96);
   font-size: 13px;
   letter-spacing: -0.01em;
   text-transform: none;
 }
 
 .grid-ui__field-value {
-  color: var(--grid-ui-text);
+  color: rgba(255, 255, 255, 0.96);
   font-size: 12px;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -529,7 +543,21 @@
 
 .grid-ui__field--slider:hover .grid-ui__slider-handle,
 .grid-ui__field--slider:focus-within .grid-ui__slider-handle {
-  background: rgba(28, 28, 30, 0.92);
+  height: 30px;
+  background: rgba(28, 28, 30, 0.84);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 8px 18px rgba(0, 0, 0, 0.22);
+}
+
+.grid-ui__field--slider:hover .grid-ui__slider-ruler,
+.grid-ui__field--slider:focus-within .grid-ui__slider-ruler {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.grid-ui__field--slider:active {
+  transform: scale(0.99);
 }
 
 .grid-ui__field--slider[data-disabled='true'] .grid-ui__slider-handle,

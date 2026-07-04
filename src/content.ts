@@ -29,7 +29,6 @@ type OverlayUi = {
   sizeField: HTMLLabelElement;
   sizeLabel: HTMLSpanElement;
   sizeValue: HTMLSpanElement;
-  sizeHint: HTMLSpanElement;
   marginValue: HTMLSpanElement;
   gutterValue: HTMLSpanElement;
   opacityValue: HTMLSpanElement;
@@ -87,7 +86,7 @@ const DISTRIBUTION_ICONS: Record<
   },
   grid: {
     stretch: { icon: 'grid-dimensions.svg' },
-    center: { icon: 'align-center-vertical.svg' },
+    center: { icon: 'square-square.svg' },
     left: undefined,
     right: undefined,
     top: undefined,
@@ -409,10 +408,6 @@ function ensureOverlayUi(): OverlayUi {
   
   const countField = createSliderField('Count', 1, 24, DEFAULT_SETTINGS.count);
   const sizeField = createSliderField('Width', 1, 400, DEFAULT_SETTINGS.size);
-  const sizeHint = document.createElement('span');
-  sizeHint.className = 'grid-ui__field-hint';
-  sizeHint.textContent = "Track size can't be changed while layout is stretched.";
-  sizeField.field.appendChild(sizeHint);
   const marginField = createSliderField('Margin', 0, 240, DEFAULT_SETTINGS.margin);
   const gutterField = createSliderField('Gutter', 0, 240, DEFAULT_SETTINGS.gutter);
 
@@ -639,7 +634,6 @@ function ensureOverlayUi(): OverlayUi {
     sizeField: sizeField.field,
     sizeLabel: sizeField.field.querySelector('.grid-ui__field-label') as HTMLSpanElement,
     sizeValue: sizeField.valueEl,
-    sizeHint,
     marginValue: marginField.valueEl,
     gutterValue: gutterField.valueEl,
     opacityValue: colorField.opacityValue,
@@ -678,7 +672,6 @@ function updateSliderVisual(input: HTMLInputElement): void {
   }
 
   field.style.setProperty('--slider-percent', `${percent}`);
-  field.style.setProperty('--slider-scale', `${percent / 100}`);
 }
 
 function bindSliderField(
@@ -917,10 +910,7 @@ function renderAdjustAxisGroup(ui: OverlayUi, settings: GridSettings): void {
 }
 
 function updateSizeAvailability(ui: OverlayUi, settings: GridSettings): void {
-  const disabled = settings.distribution === 'stretch';
-  ui.sizeRange.disabled = disabled;
-  ui.sizeField.dataset.disabled = String(disabled);
-  ui.sizeHint.hidden = !disabled;
+  ui.sizeField.hidden = settings.distribution === 'stretch';
 }
 
 function renderController(settings: GridSettings): void {

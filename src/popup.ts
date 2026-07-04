@@ -32,6 +32,7 @@ const distributionInput = document.getElementById(
 ) as HTMLSelectElement;
 const countInput = document.getElementById('count') as HTMLInputElement;
 const countValue = document.getElementById('count-value') as HTMLOutputElement;
+const sizeField = document.getElementById('size-field') as HTMLLabelElement;
 const sizeInput = document.getElementById('size') as HTMLInputElement;
 const sizeValue = document.getElementById('size-value') as HTMLOutputElement;
 const marginInput = document.getElementById('margin') as HTMLInputElement;
@@ -153,6 +154,7 @@ function renderAxisPicker(selected: GridAxis): void {
 
 function render(settings: GridSettings): void {
   currentSettings = settings;
+  const isStretch = settings.distribution === 'stretch';
 
   const axisMeta =
     AXIS_OPTIONS.find((option) => option.value === settings.axis) ?? AXIS_OPTIONS[0];
@@ -171,6 +173,7 @@ function render(settings: GridSettings): void {
 
   countInput.value = String(settings.count);
   countValue.textContent = String(settings.count);
+  sizeField.hidden = isStretch;
   sizeInput.value = String(settings.size);
   sizeValue.textContent = String(settings.size);
   marginInput.value = String(settings.margin);
