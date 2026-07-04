@@ -9,12 +9,27 @@ import {
   normalizeSettings,
 } from './utils';
 import {
+  applyPatternSelection,
+  createVariation,
+  ensureAxisPattern,
+  getActivePattern,
+  getPatternsForAxis,
+  getSiteState,
+  getSiteStorageKey,
+  normalizeGridStorage,
+  setSiteState,
+  type GridStorageState,
+  type SiteGridState,
+  updateActivePatternSettings,
+} from './site-patterns';
+import {
   createAxisGroup,
   createButton,
   createColorField,
   createDistributionGroup,
   createIcon,
   createLayoutColumn,
+  createPatternPicker,
   createPopoverHeader,
   createSection,
   createSliderField,
@@ -23,6 +38,7 @@ import {
   getAxisOption,
   renderAxisGroup,
   renderDistributionGroup,
+  renderPatternPickerMenu,
   updateSliderVisual,
 } from './content/dom-builders';
 import { renderGrid } from './content/grid-render';
@@ -47,6 +63,14 @@ type OverlayUi = {
   adjustPopoverSiteIcon: HTMLImageElement;
   adjustPopoverSiteFallback: HTMLSpanElement;
   adjustPopoverTitle: HTMLElement;
+  patternField: HTMLDivElement;
+  patternAddButton: HTMLButtonElement;
+  patternTrigger: HTMLButtonElement;
+  patternTriggerLabel: HTMLSpanElement;
+  patternMenu: HTMLDivElement;
+  patternMenuSiteTitle: HTMLSpanElement;
+  patternVariationSection: HTMLDivElement;
+  patternPresetSection: HTMLDivElement;
   adjustAxisGroup: HTMLDivElement;
   distributionGroup: HTMLDivElement;
   closeTrigger: HTMLButtonElement;
@@ -75,10 +99,14 @@ type DragState = {
 };
 
 let overlayUi: OverlayUi | null = null;
-let currentSettings = DEFAULT_SETTINGS;
+const currentSiteKey = getSiteStorageKey(window.location.hostname);
+let currentStorage: GridStorageState = normalizeGridStorage(DEFAULT_SETTINGS, currentSiteKey);
+let currentSiteState: SiteGridState = getSiteState(currentStorage, currentSiteKey);
+let currentSettings = getActivePattern(currentSiteState).settings;
 let resizeFrame = 0;
 let activePopover: PopoverName | null = null;
 let isDocumentEventsBound = false;
+let isPatternMenuOpen = false;
 const PERSIST_DELAY_MS = 250;
 let persistTimer = 0;
 let dragState: DragState | null = null;
@@ -91,7 +119,26 @@ function removeOverlay(): void {
   overlayUi?.root.remove();
   overlayUi = null;
   activePopover = null;
+  isPatternMenuOpen = false;
   dragState = null;
+}
+
+function syncSiteState(nextSiteState: SiteGridState): void {
+  currentSiteState = nextSiteState;
+  currentStorage = setSiteState(currentStorage, currentSiteKey, nextSiteState);
+  currentSettings = getActivePattern(nextSiteState).settings;
+}
+
+function setPatternMenuOpen(open: boolean): void {
+  isPatternMenuOpen = open && activePopover === 'adjust';
+
+  const ui = overlayUi;
+  if (!ui) {
+    return;
+  }
+
+  ui.patternMenu.dataset.open = String(isPatternMenuOpen);
+  ui.patternTrigger.setAttribute('aria-expanded', String(isPatternMenuOpen));
 }
 
 function applyControllerPosition(ui: OverlayUi, x: number, y: number): void {
@@ -199,10 +246,12 @@ function ensureOverlayUi(): OverlayUi {
   resetButton.className = 'grid-ui__text-button';
   resetButton.textContent = 'Reset defaults';
   resetButton.addEventListener('click', () => {
+    setPatternMenuOpen(false);
     void applySettings(
       {
         ...DEFAULT_SETTINGS,
         enabled: true,
+        axis: currentSettings.axis,
         toolbarX: currentSettings.toolbarX,
         toolbarY: currentSettings.toolbarY,
       },
@@ -211,10 +260,12 @@ function ensureOverlayUi(): OverlayUi {
   });
 
   const popoverHeader = createPopoverHeader();
+  const patternPicker = createPatternPicker();
 
   generalActions.appendChild(resetButton);
   adjustPopover.append(
     popoverHeader.header,
+    patternPicker.field,
     layoutSection,
     createSection('Measurements'),
     countField.field,
@@ -232,6 +283,12 @@ function ensureOverlayUi(): OverlayUi {
   root.addEventListener('pointerleave', () => {
     if (!root.matches(':focus-within')) {
       setActivePopover(null);
+    }
+  });
+
+  root.addEventListener('pointerdown', (event) => {
+    if (isPatternMenuOpen && !patternPicker.field.contains(event.target as Node)) {
+      setPatternMenuOpen(false);
     }
   });
 
@@ -259,6 +316,15 @@ function ensureOverlayUi(): OverlayUi {
     togglePopover('adjust');
   });
 
+  patternPicker.addButton.addEventListener('click', () => {
+    setPatternMenuOpen(false);
+    void applySiteState(createVariation(currentSiteState), { immediatePersist: true });
+  });
+
+  patternPicker.trigger.addEventListener('click', () => {
+    setPatternMenuOpen(!isPatternMenuOpen);
+  });
+
   adjustAxisGroup.addEventListener('click', (event) => {
     const target = (event.target as HTMLElement).closest<HTMLButtonElement>('.grid-ui__axis-option');
     const axis = target?.dataset.axis as GridAxis | undefined;
@@ -267,10 +333,8 @@ function ensureOverlayUi(): OverlayUi {
       return;
     }
 
-    void patchSettings({
-      axis,
-      distribution: axis === currentSettings.axis ? currentSettings.distribution : DEFAULT_SETTINGS.distribution,
-    });
+    setPatternMenuOpen(false);
+    void applySiteState(ensureAxisPattern(currentSiteState, axis), { immediatePersist: true });
   });
 
   closeTrigger.addEventListener('click', () => {
@@ -372,24 +436,29 @@ function ensureOverlayUi(): OverlayUi {
   );
 
   bindSliderField(countField.input, countField.valueEl, (value) => {
+    setPatternMenuOpen(false);
     void patchSettings({ count: value });
   });
   bindSliderField(
     sizeField.input,
     sizeField.valueEl,
     (value) => {
+      setPatternMenuOpen(false);
       void patchSettings({ size: value });
     },
     (value) => String(value),
   );
   bindSliderField(marginField.input, marginField.valueEl, (value) => {
+    setPatternMenuOpen(false);
     void patchSettings({ margin: value });
   });
   bindSliderField(gutterField.input, gutterField.valueEl, (value) => {
+    setPatternMenuOpen(false);
     void patchSettings({ gutter: value });
   });
 
   colorField.colorInput.addEventListener('input', () => {
+    setPatternMenuOpen(false);
     void patchSettings({ color: colorField.colorInput.value });
   });
 
@@ -397,6 +466,7 @@ function ensureOverlayUi(): OverlayUi {
     colorField.opacityInput,
     colorField.opacityValue,
     (value) => {
+      setPatternMenuOpen(false);
       void patchSettings({ opacity: value });
     },
     (value) => `${value}%`,
@@ -415,6 +485,14 @@ function ensureOverlayUi(): OverlayUi {
     adjustPopoverSiteIcon: popoverHeader.icon,
     adjustPopoverSiteFallback: popoverHeader.fallback,
     adjustPopoverTitle: popoverHeader.title,
+    patternField: patternPicker.field,
+    patternAddButton: patternPicker.addButton,
+    patternTrigger: patternPicker.trigger,
+    patternTriggerLabel: patternPicker.triggerLabel,
+    patternMenu: patternPicker.menu,
+    patternMenuSiteTitle: patternPicker.menuSiteTitle,
+    patternVariationSection: patternPicker.variationSection,
+    patternPresetSection: patternPicker.presetSection,
     adjustAxisGroup,
     distributionGroup,
     closeTrigger,
@@ -439,6 +517,7 @@ function ensureOverlayUi(): OverlayUi {
 function updatePopoverSiteIdentity(ui: OverlayUi): void {
   const identity = getSiteIdentity();
   ui.adjustPopoverTitle.textContent = identity.name;
+  ui.patternMenuSiteTitle.textContent = identity.name;
   ui.adjustPopoverSiteFallback.textContent = identity.fallbackLabel;
 
   if (!identity.iconUrl) {
@@ -461,6 +540,9 @@ function updatePopoverSiteIdentity(ui: OverlayUi): void {
 
 function setActivePopover(next: PopoverName | null): void {
   activePopover = next;
+  if (next !== 'adjust') {
+    isPatternMenuOpen = false;
+  }
 
   const ui = overlayUi;
   if (!ui) {
@@ -479,6 +561,9 @@ function setActivePopover(next: PopoverName | null): void {
       positionPopover(name, popover, trigger);
     }
   }
+
+  ui.patternMenu.dataset.open = String(isPatternMenuOpen);
+  ui.patternTrigger.setAttribute('aria-expanded', String(isPatternMenuOpen));
 }
 
 function togglePopover(name: PopoverName): void {
@@ -513,8 +598,23 @@ function updateSizeAvailability(ui: OverlayUi, settings: GridSettings): void {
 function renderController(settings: GridSettings): void {
   const ui = ensureOverlayUi();
   updatePopoverSiteIdentity(ui);
+  const activePattern = getActivePattern(currentSiteState);
+  const siteName = ui.adjustPopoverTitle.textContent ?? 'Website';
   renderDistributionGroup(ui.distributionGroup, settings.axis, settings.distribution, (value) => {
+    setPatternMenuOpen(false);
     void patchSettings({ distribution: value });
+  });
+  renderPatternPickerMenu(ui.patternVariationSection, ui.patternPresetSection, {
+    siteName,
+    activePatternId: activePattern.id,
+    variations: getPatternsForAxis(currentSiteState, settings.axis, 'variation'),
+    presets: getPatternsForAxis(currentSiteState, settings.axis, 'preset'),
+    onSelect: (patternId) => {
+      setPatternMenuOpen(false);
+      void applySiteState(applyPatternSelection(currentSiteState, patternId), {
+        immediatePersist: true,
+      });
+    },
   });
   renderAxisGroup(ui.adjustAxisGroup, settings.axis);
   const axisOption = getAxisOption(settings.axis);
@@ -536,6 +636,7 @@ function renderController(settings: GridSettings): void {
   );
   ui.axisTrigger.setAttribute('aria-label', settings.visible ? 'Hide overlay' : 'Show overlay');
   ui.axisTrigger.dataset.state = settings.visible ? 'visible' : 'hidden';
+  ui.patternTriggerLabel.textContent = activePattern.name;
   const controllerPosition = getControllerPosition(settings, ui);
   applyControllerPosition(ui, controllerPosition.x, controllerPosition.y);
 
@@ -585,31 +686,41 @@ function scheduleRender(settings: GridSettings): void {
   });
 }
 
-async function persistSettings(settings: GridSettings): Promise<void> {
-  await chrome.storage.sync.set({ [STORAGE_KEY]: settings });
+async function persistSettings(): Promise<void> {
+  await chrome.storage.sync.set({ [STORAGE_KEY]: currentStorage });
 }
 
-function schedulePersist(settings: GridSettings): void {
+function schedulePersist(): void {
   window.clearTimeout(persistTimer);
   persistTimer = window.setTimeout(() => {
-    void persistSettings(settings).catch(() => undefined);
+    void persistSettings().catch(() => undefined);
   }, PERSIST_DELAY_MS);
+}
+
+async function applySiteState(
+  nextSiteState: SiteGridState,
+  options: { immediatePersist?: boolean } = {},
+): Promise<void> {
+  syncSiteState(nextSiteState);
+  scheduleRender(currentSettings);
+
+  if (options.immediatePersist) {
+    window.clearTimeout(persistTimer);
+    await persistSettings();
+    return;
+  }
+
+  schedulePersist();
 }
 
 async function applySettings(
   nextSettings: GridSettings,
   options: { immediatePersist?: boolean } = {},
 ): Promise<void> {
-  currentSettings = normalizeSettings(nextSettings);
-  scheduleRender(currentSettings);
-
-  if (options.immediatePersist) {
-    window.clearTimeout(persistTimer);
-    await persistSettings(currentSettings);
-    return;
-  }
-
-  schedulePersist(currentSettings);
+  await applySiteState(
+    updateActivePatternSettings(currentSiteState, normalizeSettings(nextSettings)),
+    options,
+  );
 }
 
 async function patchSettings(partial: Partial<GridSettings>): Promise<void> {
@@ -625,13 +736,15 @@ chrome.runtime.onMessage.addListener(
       return;
     }
 
-    currentSettings = normalizeSettings(message.settings);
+    syncSiteState(updateActivePatternSettings(currentSiteState, normalizeSettings(message.settings)));
     scheduleRender(currentSettings);
   },
 );
 
 chrome.storage.sync.get({ [STORAGE_KEY]: DEFAULT_SETTINGS }, (result) => {
-  currentSettings = normalizeSettings(result[STORAGE_KEY]);
+  currentStorage = normalizeGridStorage(result[STORAGE_KEY], currentSiteKey);
+  currentSiteState = getSiteState(currentStorage, currentSiteKey);
+  currentSettings = getActivePattern(currentSiteState).settings;
   renderOverlay(currentSettings);
 });
 

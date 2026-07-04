@@ -222,6 +222,14 @@ function createVariationPattern(patterns: GridPattern[], settings: GridSettings)
   );
 }
 
+function getFirstVariation(siteState: SiteGridState): GridPattern | undefined {
+  return siteState.patterns.find((pattern) => pattern.kind === 'variation');
+}
+
+function getFirstPresetForAxis(siteState: SiteGridState, axis: GridAxis): GridPattern | undefined {
+  return getPatternsForAxis(siteState, axis, 'preset')[0];
+}
+
 function createSiteState(baseSettings: GridSettings): SiteGridState {
   const presets = createPresetPatterns();
   const variation = createVariationPattern(presets, baseSettings);
@@ -248,14 +256,15 @@ function normalizeSiteState(value: unknown, fallbackSettings: GridSettings): Sit
     patterns.unshift(createVariationPattern(patterns, fallbackSettings));
   }
 
-  const activePatternId =
-    typeof value.activePatternId === 'string' &&
-    patterns.some((pattern) => pattern.id === value.activePatternId)
-      ? value.activePatternId
-      : patterns[0]!.id;
+  const activeVariation =
+    (typeof value.activePatternId === 'string'
+      ? patterns.find(
+          (pattern) => pattern.id === value.activePatternId && pattern.kind === 'variation',
+        )
+      : null) ?? patterns.find((pattern) => pattern.kind === 'variation');
 
   return {
-    activePatternId,
+    activePatternId: activeVariation?.id ?? patterns[0]!.id,
     patterns,
   };
 }
@@ -314,7 +323,7 @@ export function setSiteState(
 export function getActivePattern(siteState: SiteGridState): GridPattern {
   return (
     siteState.patterns.find((pattern) => pattern.id === siteState.activePatternId) ??
-    siteState.patterns[0] ??
+    getFirstVariation(siteState) ??
     createVariationPattern(createPresetPatterns(), DEFAULT_SETTINGS)
   );
 }
@@ -341,16 +350,17 @@ export function selectPattern(siteState: SiteGridState, patternId: string): Site
 }
 
 export function ensureAxisPattern(siteState: SiteGridState, axis: GridAxis): SiteGridState {
-  const activePattern = getActivePattern(siteState);
-  if (activePattern.axis === axis) {
-    return siteState;
+  const existingVariation = getPatternsForAxis(siteState, axis, 'variation')[0];
+  if (existingVariation) {
+    return selectPattern(siteState, existingVariation.id);
   }
 
-  const nextPattern =
-    getPatternsForAxis(siteState, axis, 'variation')[0] ??
-    getPatternsForAxis(siteState, axis, 'preset')[0];
-
-  return nextPattern ? selectPattern(siteState, nextPattern.id) : siteState;
+  const template = getFirstPresetForAxis(siteState, axis)?.settings ?? { ...DEFAULT_SETTINGS, axis };
+  const nextPattern = createVariationPattern(siteState.patterns, template);
+  return {
+    activePatternId: nextPattern.id,
+    patterns: [nextPattern, ...siteState.patterns],
+  };
 }
 
 export function updateActivePatternSettings(
@@ -358,10 +368,12 @@ export function updateActivePatternSettings(
   settings: GridSettings,
 ): SiteGridState {
   const normalized = normalizeSettings(settings);
+  const ensuredState = ensureAxisPattern(siteState, normalized.axis);
   return {
-    ...siteState,
-    patterns: siteState.patterns.map((pattern) =>
-      pattern.id === siteState.activePatternId
+    ...ensuredState,
+    activePatternId: getActivePattern(ensuredState).id,
+    patterns: ensuredState.patterns.map((pattern) =>
+      pattern.id === ensuredState.activePatternId
         ? {
             ...pattern,
             axis: normalized.axis,
@@ -370,6 +382,19 @@ export function updateActivePatternSettings(
         : pattern,
     ),
   };
+}
+
+export function applyPatternSelection(siteState: SiteGridState, patternId: string): SiteGridState {
+  const selectedPattern = siteState.patterns.find((pattern) => pattern.id === patternId);
+  if (!selectedPattern) {
+    return siteState;
+  }
+
+  if (selectedPattern.kind === 'variation') {
+    return selectPattern(siteState, patternId);
+  }
+
+  return updateActivePatternSettings(ensureAxisPattern(siteState, selectedPattern.axis), selectedPattern.settings);
 }
 
 export function createVariation(siteState: SiteGridState): SiteGridState {

@@ -7,11 +7,17 @@ import {
   type GridSettings,
   normalizeSettings,
 } from './utils';
+import {
+  getActivePattern,
+  getSiteState,
+  getSiteStorageKey,
+  normalizeGridStorage,
+} from './site-patterns';
 
 type StoredSettings = Record<string, unknown>;
 
 function createChromeMock(initial: Partial<GridSettings> = {}) {
-  let stored: GridSettings = normalizeSettings({ ...DEFAULT_SETTINGS, ...initial });
+  let stored: unknown = normalizeSettings({ ...DEFAULT_SETTINGS, ...initial });
   const messageListeners: Array<(message: { type?: string; settings?: GridSettings }) => void> = [];
 
   const chromeMock = {
@@ -43,7 +49,11 @@ function createChromeMock(initial: Partial<GridSettings> = {}) {
     emitMessage: (message: { type?: string; settings?: GridSettings }) => {
       messageListeners.forEach((listener) => listener(message));
     },
-    getStoredSettings: () => stored,
+    getStoredSettings: () => {
+      const siteKey = getSiteStorageKey(window.location.hostname);
+      const storage = normalizeGridStorage(stored, siteKey);
+      return getActivePattern(getSiteState(storage, siteKey)).settings;
+    },
   };
 }
 
@@ -153,6 +163,67 @@ describe('adjust popover', () => {
   });
 });
 
+describe('pattern picker', () => {
+  it('filters variations and defaults by the active axis', async () => {
+    await loadContentScript();
+    const overlay = getOverlay();
+    const adjustTrigger = overlay.querySelector('.grid-ui__anchor--center') as HTMLButtonElement;
+    const patternTrigger = overlay.querySelector('.grid-ui__pattern-trigger') as HTMLButtonElement;
+
+    adjustTrigger.click();
+    patternTrigger.click();
+
+    const initialOptions = Array.from(
+      overlay.querySelectorAll('.grid-ui__pattern-option'),
+      (option) => option.textContent,
+    );
+
+    expect(initialOptions).toContain('Version 1');
+    expect(initialOptions).toContain('Web 12');
+    expect(initialOptions).not.toContain('Rhythm 8');
+
+    const rowsOption = overlay.querySelector('[data-axis="rows"]') as HTMLButtonElement;
+    rowsOption.click();
+    patternTrigger.click();
+
+    const rowOptions = Array.from(
+      overlay.querySelectorAll('.grid-ui__pattern-option'),
+      (option) => option.textContent,
+    );
+
+    expect(rowOptions).toContain('Version 2');
+    expect(rowOptions).toContain('Rhythm 8');
+    expect(rowOptions).not.toContain('Web 12');
+  });
+
+  it('applies defaults onto the active variation and can snapshot a new version', async () => {
+    const { getStoredSettings } = await loadContentScript();
+    const overlay = getOverlay();
+    const adjustTrigger = overlay.querySelector('.grid-ui__anchor--center') as HTMLButtonElement;
+    const patternTrigger = overlay.querySelector('.grid-ui__pattern-trigger') as HTMLButtonElement;
+    const patternLabel = overlay.querySelector('.grid-ui__pattern-trigger-label') as HTMLSpanElement;
+    const addButton = overlay.querySelector('.grid-ui__pattern-action') as HTMLButtonElement;
+
+    adjustTrigger.click();
+    patternTrigger.click();
+
+    const webTwelve = Array.from(
+      overlay.querySelectorAll<HTMLButtonElement>('.grid-ui__pattern-option'),
+    ).find((option) => option.textContent === 'Web 12');
+
+    webTwelve?.click();
+
+    expect(patternLabel.textContent).toBe('Version 1');
+    const frame = (overlay.querySelector('.grid-ui__layer') as HTMLElement).firstElementChild as HTMLElement;
+    expect(frame.children).toHaveLength(12);
+
+    addButton.click();
+
+    expect(patternLabel.textContent).toBe('Version 2');
+    expect(getStoredSettings().count).toBe(12);
+  });
+});
+
 describe('measurement controls', () => {
   it('updates the count and the rendered grid when the count slider changes', async () => {
     await loadContentScript();
@@ -186,7 +257,7 @@ describe('measurement controls', () => {
 
 describe('axis switching', () => {
   it('resets the distribution and re-renders the grid for the new axis', async () => {
-    await loadContentScript();
+    const { getStoredSettings } = await loadContentScript();
     const overlay = getOverlay();
     const rowsOption = overlay.querySelector('[data-axis="rows"]') as HTMLButtonElement;
 
@@ -203,7 +274,10 @@ describe('axis switching', () => {
     expect(sizeLabel?.textContent).toBe('Height');
 
     const frame = (overlay.querySelector('.grid-ui__layer') as HTMLElement).firstElementChild as HTMLElement;
-    expect(frame.style.gridTemplateRows).toBe(`repeat(${DEFAULT_SETTINGS.count}, minmax(0, 1fr))`);
+    expect(getStoredSettings().axis).toBe('rows');
+    expect(frame.style.gridTemplateRows).toBe(
+      `repeat(${getStoredSettings().count}, minmax(0, 1fr))`,
+    );
   });
 });
 
