@@ -37,7 +37,6 @@ import {
   bindSliderField,
   getAssetUrl,
   getAxisOption,
-  renderAddVariationIcon,
   renderAxisGroup,
   renderDistributionGroup,
   renderPatternPickerMenu,
@@ -67,7 +66,6 @@ type OverlayUi = {
   adjustPopoverTitle: HTMLElement;
   patternField: HTMLDivElement;
   patternAddButton: HTMLButtonElement;
-  patternAddIcon: HTMLSpanElement;
   patternTrigger: HTMLButtonElement;
   patternTriggerLabel: HTMLSpanElement;
   patternMenu: HTMLDivElement;
@@ -478,7 +476,6 @@ function ensureOverlayUi(): OverlayUi {
     adjustPopoverTitle: popoverHeader.title,
     patternField: patternPicker.field,
     patternAddButton: patternPicker.addButton,
-    patternAddIcon: patternPicker.addIcon,
     patternTrigger: patternPicker.trigger,
     patternTriggerLabel: patternPicker.triggerLabel,
     patternMenu: patternPicker.menu,
@@ -664,7 +661,6 @@ function renderController(settings: GridSettings): void {
     },
   });
   renderAxisGroup(ui.adjustAxisGroup, settings.axis);
-  renderAddVariationIcon(ui.patternAddIcon, settings.axis);
   const axisOption = getAxisOption(settings.axis);
   ui.adjustTriggerIcon.style.setProperty(
     '--grid-icon-url',

@@ -9,7 +9,6 @@ import {
   createSliderField,
   getAssetUrl,
   getAxisOption,
-  renderAddVariationIcon,
   renderAxisGroup,
   renderDistributionGroup,
   updateSliderVisual,
@@ -130,28 +129,6 @@ describe('createPatternPicker', () => {
     expect(chevron?.style.getPropertyValue('--grid-icon-url')).toBe(
       'url("chrome-extension://test-id/assets/chevron.svg")',
     );
-    expect(picker.addIcon.className).toBe('grid-ui__pattern-action-icon');
-    renderAddVariationIcon(picker.addIcon, 'rows');
-    expect(picker.addIcon.style.getPropertyValue('--grid-icon-url')).toBe(
-      'url("chrome-extension://test-id/assets/ruler-horizontal-plus.svg")',
-    );
-    expect(picker.addIcon.style.getPropertyValue('--grid-icon-rotation')).toBe('0deg');
-    expect(picker.addIcon.style.getPropertyValue('--grid-icon-scale-x')).toBe('1');
-    renderAddVariationIcon(picker.addIcon, 'columns');
-    expect(picker.addIcon.style.getPropertyValue('--grid-icon-rotation')).toBe('90deg');
-    expect(picker.addIcon.style.getPropertyValue('--grid-icon-scale-x')).toBe('-1');
-  });
-});
-
-describe('renderAddVariationIcon', () => {
-  it('uses the grid icon for square grid mode', () => {
-    const picker = createPatternPicker();
-    renderAddVariationIcon(picker.addIcon, 'grid');
-    expect(picker.addIcon.style.getPropertyValue('--grid-icon-url')).toBe(
-      'url("chrome-extension://test-id/assets/grid-2x2-plus.svg")',
-    );
-    expect(picker.addIcon.style.getPropertyValue('--grid-icon-rotation')).toBe('0deg');
-    expect(picker.addIcon.style.getPropertyValue('--grid-icon-scale-x')).toBe('1');
   });
 });
 

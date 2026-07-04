@@ -350,19 +350,28 @@
   letter-spacing: -0.01em;
 }
 
-.grid-ui__pattern-action-icon {
+.grid-ui__plus-icon {
+  position: relative;
   width: 14px;
   height: 14px;
+}
+
+.grid-ui__plus-icon::before,
+.grid-ui__plus-icon::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 2px;
+  border-radius: 999px;
   background: currentColor;
-  mask-image: var(--grid-icon-url);
-  mask-repeat: no-repeat;
-  mask-position: center;
-  mask-size: contain;
-  -webkit-mask-image: var(--grid-icon-url);
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  -webkit-mask-size: contain;
-  transform: rotate(var(--grid-icon-rotation, 0deg)) scaleX(var(--grid-icon-scale-x, 1));
+  transform: translate(-50%, -50%);
+}
+
+.grid-ui__plus-icon::after {
+  width: 2px;
+  height: 14px;
 }
 
 .grid-ui__pattern-trigger-chevron {
