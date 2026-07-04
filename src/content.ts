@@ -20,6 +20,7 @@ type OverlayUi = {
   axisTrigger: HTMLButtonElement;
   axisTriggerIcon: HTMLSpanElement;
   adjustTrigger: HTMLButtonElement;
+  adjustTriggerIcon: HTMLSpanElement;
   adjustPopover: HTMLDivElement;
   adjustAxisGroup: HTMLDivElement;
   distributionGroup: HTMLDivElement;
@@ -55,17 +56,21 @@ const AXIS_OPTIONS: Array<{
   icon: string;
   rotation?: number;
 }> = [
-  { value: 'columns', label: 'Vertical', icon: 'measure.svg', rotation: 90 },
-  { value: 'rows', label: 'Horizontal', icon: 'measure.svg', rotation: 180 },
-  { value: 'grid', label: 'Grid', icon: 'grid.svg' },
+  { value: 'columns', label: 'Vertical', icon: 'measure.svg', rotation: 45 },
+  { value: 'rows', label: 'Horizontal', icon: 'measure.svg', rotation: 135 },
+  { value: 'grid', label: 'Grid', icon: 'grid-2x2.svg' },
 ];
+
+function getAxisOption(axis: GridAxis): (typeof AXIS_OPTIONS)[number] {
+  return AXIS_OPTIONS.find((option) => option.value === axis) ?? AXIS_OPTIONS[0];
+}
 
 const DISTRIBUTION_ICONS: Record<
   GridAxis,
   Record<GridDistribution, { icon: string; rotation?: number } | undefined>
 > = {
   columns: {
-    stretch: { icon: 'dimension.svg' },
+    stretch: { icon: 'dimension.svg', rotation: 90 },
     center: { icon: 'align-center-vertical.svg' },
     left: { icon: 'align-start-vertical.svg' },
     right: { icon: 'align-end-vertical.svg' },
@@ -371,13 +376,16 @@ function ensureOverlayUi(): OverlayUi {
 
   const axisTriggerIcon = axisTrigger.firstChild as HTMLSpanElement;
 
+  const defaultAxis = getAxisOption(DEFAULT_SETTINGS.axis);
   const adjustTrigger = createButton(
     'Adjust grid settings',
-    createIcon('dimension.svg', 'grid-ui__button-icon'),
+    createIcon(defaultAxis.icon, 'grid-ui__button-icon', defaultAxis.rotation ?? 0),
   );
   adjustTrigger.classList.add('grid-ui__anchor', 'grid-ui__anchor--center');
   adjustTrigger.setAttribute('aria-haspopup', 'dialog');
   adjustTrigger.setAttribute('aria-expanded', 'false');
+
+  const adjustTriggerIcon = adjustTrigger.firstChild as HTMLSpanElement;
 
   const closeTrigger = document.createElement('button');
   closeTrigger.type = 'button';
@@ -622,6 +630,7 @@ function ensureOverlayUi(): OverlayUi {
     axisTrigger,
     axisTriggerIcon,
     adjustTrigger,
+    adjustTriggerIcon,
     adjustPopover,
     adjustAxisGroup,
     distributionGroup,
@@ -918,6 +927,15 @@ function renderController(settings: GridSettings): void {
   const ui = ensureOverlayUi();
   renderDistributionGroup(ui, settings);
   renderAdjustAxisGroup(ui, settings);
+  const axisOption = getAxisOption(settings.axis);
+  ui.adjustTriggerIcon.style.setProperty(
+    '--grid-icon-url',
+    `url("${getAssetUrl(axisOption.icon)}")`,
+  );
+  ui.adjustTriggerIcon.style.setProperty(
+    '--grid-icon-rotation',
+    `${axisOption.rotation ?? 0}deg`,
+  );
   ui.axisTriggerIcon.style.setProperty(
     '--grid-icon-url',
     `url("${getAssetUrl(settings.visible ? 'open-eye.svg' : 'closed-eye.svg')}")`,

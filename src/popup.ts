@@ -54,13 +54,13 @@ const AXIS_OPTIONS: Array<{
     value: 'columns',
     label: 'Vertical',
     icon: 'assets/measure.svg',
-    rotation: '90deg',
+    rotation: '45deg',
   },
   {
     value: 'rows',
     label: 'Horizontal',
     icon: 'assets/measure.svg',
-    rotation: '180deg',
+    rotation: '135deg',
   },
   { value: 'grid', label: 'Grid', icon: 'assets/grid.svg' },
 ];
