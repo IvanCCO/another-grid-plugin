@@ -36,7 +36,7 @@ const MIN_SPACING = 0;
 const MAX_SPACING = 240;
 
 export const DEFAULT_SETTINGS: GridSettings = {
-  enabled: true,
+  enabled: false,
   visible: true,
   toolbarX: null,
   toolbarY: null,
