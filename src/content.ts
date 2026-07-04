@@ -22,6 +22,10 @@ type OverlayUi = {
   adjustTrigger: HTMLButtonElement;
   adjustTriggerIcon: HTMLSpanElement;
   adjustPopover: HTMLDivElement;
+  adjustPopoverSiteBadge: HTMLSpanElement;
+  adjustPopoverSiteIcon: HTMLImageElement;
+  adjustPopoverSiteFallback: HTMLSpanElement;
+  adjustPopoverTitle: HTMLElement;
   adjustAxisGroup: HTMLDivElement;
   distributionGroup: HTMLDivElement;
   closeTrigger: HTMLButtonElement;
@@ -47,6 +51,12 @@ type DragState = {
   startX: number;
   startY: number;
   moved: boolean;
+};
+
+type SiteIdentity = {
+  name: string;
+  iconUrl: string | null;
+  fallbackLabel: string;
 };
 
 const AXIS_OPTIONS: Array<{
@@ -111,6 +121,73 @@ const POPOVER_GAP = 10;
 
 function getAssetUrl(filename: string): string {
   return chrome.runtime.getURL(`assets/${filename}`);
+}
+
+function getMetaContent(selector: string): string | null {
+  const content = document.querySelector<HTMLMetaElement>(selector)?.content?.trim();
+  return content ? content : null;
+}
+
+function getSiteNameFromTitle(title: string): string | null {
+  const segments = title
+    .split(/\s+[|·\-–—:]\s+/)
+    .map((segment) => segment.trim())
+    .filter(Boolean);
+
+  if (segments.length >= 3) {
+    return segments[segments.length - 1] ?? null;
+  }
+
+  if (segments.length === 2) {
+    return segments[0].length <= segments[1].length ? segments[0] : segments[1];
+  }
+
+  return null;
+}
+
+function getHostnameLabel(): string {
+  return window.location.hostname.replace(/^www\./, '').trim() || 'Website';
+}
+
+function getSiteIconUrl(): string | null {
+  const selectors = [
+    'link[rel="apple-touch-icon"]',
+    'link[rel="apple-touch-icon-precomposed"]',
+    'link[rel="icon"]',
+    'link[rel="shortcut icon"]',
+    'link[rel*="icon"]',
+  ];
+
+  for (const selector of selectors) {
+    const href = document.querySelector<HTMLLinkElement>(selector)?.href?.trim();
+    if (href) {
+      return new URL(href, window.location.href).href;
+    }
+  }
+
+  return window.location.origin.startsWith('http')
+    ? new URL('/favicon.ico', window.location.origin).href
+    : null;
+}
+
+function getSiteFallbackLabel(name: string): string {
+  const match = name.match(/[A-Za-z0-9]/);
+  return match?.[0]?.toUpperCase() ?? '•';
+}
+
+function getSiteIdentity(): SiteIdentity {
+  const name =
+    getMetaContent('meta[property="og:site_name"]') ??
+    getMetaContent('meta[name="application-name"]') ??
+    getMetaContent('meta[name="apple-mobile-web-app-title"]') ??
+    getSiteNameFromTitle(document.title) ??
+    getHostnameLabel();
+
+  return {
+    name,
+    iconUrl: getSiteIconUrl(),
+    fallbackLabel: getSiteFallbackLabel(name),
+  };
 }
 
 function removeOverlay(): void {
@@ -437,9 +514,11 @@ function ensureOverlayUi(): OverlayUi {
     );
   });
 
+  const popoverHeader = createPopoverHeader();
+
   generalActions.appendChild(resetButton);
   adjustPopover.append(
-    createPopoverHeader('Adjust grid'),
+    popoverHeader.header,
     layoutSection,
     createSection('Measurements'),
     countField.field,
@@ -636,6 +715,10 @@ function ensureOverlayUi(): OverlayUi {
     adjustTrigger,
     adjustTriggerIcon,
     adjustPopover,
+    adjustPopoverSiteBadge: popoverHeader.badge,
+    adjustPopoverSiteIcon: popoverHeader.icon,
+    adjustPopoverSiteFallback: popoverHeader.fallback,
+    adjustPopoverTitle: popoverHeader.title,
     adjustAxisGroup,
     distributionGroup,
     closeTrigger,
@@ -657,16 +740,70 @@ function ensureOverlayUi(): OverlayUi {
   return overlayUi;
 }
 
-function createPopoverHeader(title: string): HTMLDivElement {
+function createPopoverHeader(): {
+  header: HTMLDivElement;
+  badge: HTMLSpanElement;
+  icon: HTMLImageElement;
+  fallback: HTMLSpanElement;
+  title: HTMLElement;
+} {
   const header = document.createElement('div');
   header.className = 'grid-ui__popover-header';
 
+  const badge = document.createElement('span');
+  badge.className = 'grid-ui__site-badge';
+  badge.dataset.iconState = 'fallback';
+
+  const icon = document.createElement('img');
+  icon.className = 'grid-ui__site-icon';
+  icon.alt = '';
+  icon.decoding = 'async';
+
+  const fallback = document.createElement('span');
+  fallback.className = 'grid-ui__site-fallback';
+
+  icon.addEventListener('load', () => {
+    if (icon.currentSrc) {
+      badge.dataset.iconState = 'loaded';
+    }
+  });
+
+  icon.addEventListener('error', () => {
+    badge.dataset.iconState = 'fallback';
+    icon.removeAttribute('src');
+  });
+
+  badge.append(icon, fallback);
+
   const heading = document.createElement('strong');
   heading.className = 'grid-ui__popover-title';
-  heading.textContent = title;
+  heading.textContent = 'Website';
 
-  header.appendChild(heading);
-  return header;
+  header.append(badge, heading);
+  return { header, badge, icon, fallback, title: heading };
+}
+
+function updatePopoverSiteIdentity(ui: OverlayUi): void {
+  const identity = getSiteIdentity();
+  ui.adjustPopoverTitle.textContent = identity.name;
+  ui.adjustPopoverSiteFallback.textContent = identity.fallbackLabel;
+
+  if (!identity.iconUrl) {
+    ui.adjustPopoverSiteBadge.dataset.iconState = 'fallback';
+    ui.adjustPopoverSiteIcon.removeAttribute('src');
+    return;
+  }
+
+  ui.adjustPopoverSiteBadge.dataset.iconState = 'loading';
+
+  if (ui.adjustPopoverSiteIcon.getAttribute('src') !== identity.iconUrl) {
+    ui.adjustPopoverSiteIcon.src = identity.iconUrl;
+    return;
+  }
+
+  if (ui.adjustPopoverSiteIcon.complete && ui.adjustPopoverSiteIcon.naturalWidth > 0) {
+    ui.adjustPopoverSiteBadge.dataset.iconState = 'loaded';
+  }
 }
 
 function updateSliderVisual(input: HTMLInputElement): void {
@@ -924,6 +1061,7 @@ function updateSizeAvailability(ui: OverlayUi, settings: GridSettings): void {
 
 function renderController(settings: GridSettings): void {
   const ui = ensureOverlayUi();
+  updatePopoverSiteIdentity(ui);
   renderDistributionGroup(ui, settings);
   renderAdjustAxisGroup(ui, settings);
   const axisOption = getAxisOption(settings.axis);
