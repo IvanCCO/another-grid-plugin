@@ -17,7 +17,7 @@ describe('resize handling', () => {
   });
 
   it('re-renders the grid when the window is resized', async () => {
-    const stored = normalizeSettings(DEFAULT_SETTINGS);
+    const stored = normalizeSettings({ ...DEFAULT_SETTINGS, enabled: true });
     vi.stubGlobal('chrome', {
       runtime: {
         getURL: (path: string) => `chrome-extension://test-id/${path}`,

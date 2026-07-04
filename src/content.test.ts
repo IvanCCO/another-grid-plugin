@@ -95,8 +95,14 @@ afterEach(() => {
 });
 
 describe('initial render', () => {
-  it('renders the overlay with the default stretch column grid', async () => {
+  it('does not render the overlay while disabled by default', async () => {
     await loadContentScript();
+
+    expect(document.getElementById(GRID_OVERLAY_ID)).toBeNull();
+  });
+
+  it('renders the overlay with the default stretch column grid when enabled', async () => {
+    await loadContentScript({ enabled: true });
 
     const overlay = getOverlay();
     const gridLayer = overlay.querySelector('.grid-ui__layer') as HTMLElement;
@@ -106,10 +112,10 @@ describe('initial render', () => {
     expect(frame.style.gridTemplateColumns).toBe(`repeat(${DEFAULT_SETTINGS.count}, minmax(0, 1fr))`);
   });
 
-  it('reads the site identity from the page metadata for the popover header', async () => {
+  it('reads the site identity from the page metadata for the popover header when enabled', async () => {
     document.head.innerHTML = '<meta property="og:site_name" content="Acme Corp" />';
 
-    await loadContentScript();
+    await loadContentScript({ enabled: true });
 
     const title = document.querySelector('.grid-ui__popover-title');
     expect(title?.textContent).toBe('Acme Corp');
@@ -118,7 +124,7 @@ describe('initial render', () => {
 
 describe('visibility toggle', () => {
   it('hides the grid layer and flips the trigger icon state', async () => {
-    await loadContentScript();
+    await loadContentScript({ enabled: true });
     const overlay = getOverlay();
     const axisTrigger = overlay.querySelector('.grid-ui__anchor--start') as HTMLButtonElement;
     const gridLayer = overlay.querySelector('.grid-ui__layer') as HTMLElement;
@@ -131,7 +137,7 @@ describe('visibility toggle', () => {
   });
 
   it('persists the change to chrome.storage.sync after the debounce delay', async () => {
-    const { chromeMock, getStoredSettings } = await loadContentScript();
+    const { chromeMock, getStoredSettings } = await loadContentScript({ enabled: true });
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 
     const overlay = getOverlay();
@@ -149,7 +155,7 @@ describe('visibility toggle', () => {
 
 describe('adjust popover', () => {
   it('opens on trigger click and closes when clicked again', async () => {
-    await loadContentScript();
+    await loadContentScript({ enabled: true });
     const overlay = getOverlay();
     const adjustTrigger = overlay.querySelector('.grid-ui__anchor--center') as HTMLButtonElement;
     const popover = overlay.querySelector('[data-popover="adjust"]') as HTMLElement;
@@ -166,7 +172,7 @@ describe('adjust popover', () => {
 
 describe('pattern picker', () => {
   it('lists all variations and defaults regardless of the active axis', async () => {
-    await loadContentScript();
+    await loadContentScript({ enabled: true });
     const overlay = getOverlay();
     const adjustTrigger = overlay.querySelector('.grid-ui__anchor--center') as HTMLButtonElement;
     const patternTrigger = overlay.querySelector('.grid-ui__pattern-trigger') as HTMLButtonElement;
@@ -202,7 +208,7 @@ describe('pattern picker', () => {
   });
 
   it('applies defaults onto the active variation and can snapshot a new version', async () => {
-    const { getStoredSettings } = await loadContentScript();
+    const { getStoredSettings } = await loadContentScript({ enabled: true });
     const overlay = getOverlay();
     const adjustTrigger = overlay.querySelector('.grid-ui__anchor--center') as HTMLButtonElement;
     const patternTrigger = overlay.querySelector('.grid-ui__pattern-trigger') as HTMLButtonElement;
@@ -241,7 +247,7 @@ describe('pattern picker', () => {
 
 describe('measurement controls', () => {
   it('updates the count and the rendered grid when the count slider changes', async () => {
-    await loadContentScript();
+    await loadContentScript({ enabled: true });
     const overlay = getOverlay();
     const countRange = overlay.querySelector('.grid-ui__field--slider input[min="1"][max="24"]') as HTMLInputElement;
 
@@ -253,7 +259,7 @@ describe('measurement controls', () => {
   });
 
   it('hides the size field for stretch and shows it for a fixed distribution', async () => {
-    await loadContentScript();
+    await loadContentScript({ enabled: true });
     const overlay = getOverlay();
     const sizeField = overlay.querySelector('.grid-ui__field--slider--color')
       ?.parentElement?.querySelectorAll('label')[1] as HTMLLabelElement | undefined;
@@ -272,7 +278,7 @@ describe('measurement controls', () => {
 
 describe('axis switching', () => {
   it('resets the distribution and re-renders the grid for the new axis', async () => {
-    const { getStoredSettings } = await loadContentScript();
+    const { getStoredSettings } = await loadContentScript({ enabled: true });
     const overlay = getOverlay();
     const rowsOption = overlay.querySelector('[data-axis="rows"]') as HTMLButtonElement;
 
@@ -298,7 +304,7 @@ describe('axis switching', () => {
 
 describe('disabling', () => {
   it('removes the overlay from the DOM and persists enabled:false immediately when closed', async () => {
-    const { chromeMock, getStoredSettings } = await loadContentScript();
+    const { chromeMock, getStoredSettings } = await loadContentScript({ enabled: true });
     const overlay = getOverlay();
     const closeTrigger = overlay.querySelector('.grid-ui__close') as HTMLButtonElement;
 
@@ -313,12 +319,12 @@ describe('disabling', () => {
 
 describe('background/popup messaging', () => {
   it('re-renders when a GRID_SETTINGS_UPDATED message arrives', async () => {
-    const { emitMessage } = await loadContentScript();
+    const { emitMessage } = await loadContentScript({ enabled: true });
     const overlay = getOverlay();
 
     emitMessage({
       type: GRID_MESSAGE_TYPE,
-      settings: { ...DEFAULT_SETTINGS, axis: 'grid', size: 70 },
+      settings: { ...DEFAULT_SETTINGS, enabled: true, axis: 'grid', size: 70 },
     });
 
     const frame = (overlay.querySelector('.grid-ui__layer') as HTMLElement).firstElementChild as HTMLElement;
@@ -326,12 +332,12 @@ describe('background/popup messaging', () => {
   });
 
   it('shows only size and color controls in grid mode', async () => {
-    const { emitMessage } = await loadContentScript();
+    const { emitMessage } = await loadContentScript({ enabled: true });
     const overlay = getOverlay();
 
     emitMessage({
       type: GRID_MESSAGE_TYPE,
-      settings: { ...DEFAULT_SETTINGS, axis: 'grid', size: 70 },
+      settings: { ...DEFAULT_SETTINGS, enabled: true, axis: 'grid', size: 70 },
     });
 
     const adjustTrigger = overlay.querySelector('.grid-ui__anchor--center') as HTMLButtonElement;
@@ -359,7 +365,7 @@ describe('background/popup messaging', () => {
   });
 
   it('ignores messages with an unrelated type', async () => {
-    const { emitMessage } = await loadContentScript();
+    const { emitMessage } = await loadContentScript({ enabled: true });
     const overlay = getOverlay();
     const frameBefore = (overlay.querySelector('.grid-ui__layer') as HTMLElement).firstElementChild as HTMLElement;
     const childCountBefore = frameBefore.children.length;
@@ -373,7 +379,7 @@ describe('background/popup messaging', () => {
 
 describe('controller drag', () => {
   it('adds and removes dragging class during pointer interaction', async () => {
-    await loadContentScript();
+    await loadContentScript({ enabled: true });
     const overlay = getOverlay();
     const controller = overlay.querySelector('.grid-ui__controller') as HTMLElement;
 
