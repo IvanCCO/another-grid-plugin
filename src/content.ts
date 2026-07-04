@@ -72,6 +72,8 @@ let suppressClickUntil = 0;
 
 const CONTROLLER_VIEWPORT_PADDING = 18;
 const DRAG_THRESHOLD_PX = 6;
+const POPOVER_VIEWPORT_PADDING = 12;
+const POPOVER_GAP = 10;
 
 function getAssetUrl(filename: string): string {
   return chrome.runtime.getURL(`assets/${filename}`);
@@ -677,26 +679,41 @@ function positionPopover(
   trigger: HTMLButtonElement,
 ): void {
   const rect = trigger.getBoundingClientRect();
-  const width = 304;
-  const gap = 10;
-  const viewportPadding = 12;
+  const width = popover.offsetWidth || 304;
+  const height = popover.offsetHeight || 420;
 
   let left = rect.right - width;
-  let originX = '100%';
+  let preferredAnchorX = rect.right;
 
   if (name === 'adjust') {
     left = rect.left + rect.width / 2 - width / 2;
-    originX = '50%';
+    preferredAnchorX = rect.left + rect.width / 2;
   }
 
   const clampedLeft = Math.min(
-    Math.max(left, viewportPadding),
-    window.innerWidth - width - viewportPadding,
+    Math.max(left, POPOVER_VIEWPORT_PADDING),
+    window.innerWidth - width - POPOVER_VIEWPORT_PADDING,
   );
 
-  popover.style.top = `${rect.bottom + gap}px`;
+  const originX = Math.min(
+    Math.max(((preferredAnchorX - clampedLeft) / width) * 100, 12),
+    88,
+  );
+  const spaceBelow = window.innerHeight - rect.bottom - POPOVER_GAP - POPOVER_VIEWPORT_PADDING;
+  const spaceAbove = rect.top - POPOVER_GAP - POPOVER_VIEWPORT_PADDING;
+  const openBelow = spaceBelow >= height || spaceBelow >= spaceAbove;
+  const top = openBelow
+    ? rect.bottom + POPOVER_GAP
+    : rect.top - POPOVER_GAP - height;
+  const clampedTop = Math.min(
+    Math.max(top, POPOVER_VIEWPORT_PADDING),
+    window.innerHeight - height - POPOVER_VIEWPORT_PADDING,
+  );
+
+  popover.dataset.side = openBelow ? 'bottom' : 'top';
+  popover.style.top = `${clampedTop}px`;
   popover.style.left = `${clampedLeft}px`;
-  popover.style.transformOrigin = `${originX} 0%`;
+  popover.style.transformOrigin = `${originX}% ${openBelow ? '0%' : '100%'}`;
 }
 
 function createTrack(color: string): HTMLDivElement {
@@ -880,6 +897,10 @@ function renderController(settings: GridSettings): void {
   ui.gutterValue.textContent = String(settings.gutter);
   ui.opacityValue.textContent = `${settings.opacity}%`;
   updateSizeAvailability(ui, settings);
+
+  if (activePopover === 'adjust') {
+    positionPopover('adjust', ui.adjustPopover, ui.adjustTrigger);
+  }
 }
 
 function renderOverlay(settings: GridSettings): void {

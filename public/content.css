@@ -157,6 +157,7 @@
 }
 
 .grid-ui__popover {
+  --grid-ui-popover-shift-y: 8px;
   position: fixed;
   width: 304px;
   display: grid;
@@ -170,18 +171,26 @@
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
   opacity: 0;
-  transform: translateY(-8px) scale(0.97);
+  filter: blur(4px);
+  transform: translateY(var(--grid-ui-popover-shift-y)) scale(0.96);
   transform-origin: 100% 0%;
   transition:
     transform 180ms var(--grid-ui-ease-out),
-    opacity 160ms ease-out;
+    opacity 160ms ease-out,
+    filter 180ms var(--grid-ui-ease-out);
   visibility: hidden;
+  will-change: transform, opacity, filter;
 }
 
 .grid-ui__popover[data-open='true'] {
   opacity: 1;
   transform: translateY(0) scale(1);
+  filter: blur(0);
   visibility: visible;
+}
+
+.grid-ui__popover[data-side='top'] {
+  --grid-ui-popover-shift-y: -8px;
 }
 
 .grid-ui__popover-header {
