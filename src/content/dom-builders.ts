@@ -307,8 +307,6 @@ export function createPatternPicker(): {
   addButton: HTMLButtonElement;
   trigger: HTMLButtonElement;
   triggerLabel: HTMLSpanElement;
-  saveButton: HTMLButtonElement;
-  saveIcon: HTMLSpanElement;
   menu: HTMLDivElement;
   menuSiteTitle: HTMLSpanElement;
   variationSection: HTMLDivElement;
@@ -341,16 +339,6 @@ export function createPatternPicker(): {
 
   trigger.append(triggerLabel, chevron);
 
-  const saveButton = document.createElement('button');
-  saveButton.type = 'button';
-  saveButton.className = 'grid-ui__pattern-save';
-  saveButton.setAttribute('aria-label', 'Save current configuration');
-  saveButton.dataset.state = 'idle';
-
-  const saveIcon = createIcon('save.svg', 'grid-ui__pattern-save-icon');
-  saveIcon.setAttribute('aria-hidden', 'true');
-  saveButton.appendChild(saveIcon);
-
   const menu = document.createElement('div');
   menu.className = 'grid-ui__pattern-menu';
   menu.setAttribute('role', 'menu');
@@ -367,7 +355,7 @@ export function createPatternPicker(): {
   presetSection.className = 'grid-ui__pattern-menu-section';
 
   menu.append(menuSiteTitle, variationSection, presetSection);
-  controls.append(addButton, trigger, saveButton);
+  controls.append(addButton, trigger);
   field.append(controls, menu);
 
   return {
@@ -375,8 +363,6 @@ export function createPatternPicker(): {
     addButton,
     trigger,
     triggerLabel,
-    saveButton,
-    saveIcon,
     menu,
     menuSiteTitle,
     variationSection,

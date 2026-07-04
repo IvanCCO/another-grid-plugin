@@ -75,7 +75,6 @@
 .grid-ui__menu-item,
 .grid-ui__pattern-action,
 .grid-ui__pattern-trigger,
-.grid-ui__pattern-save,
 .grid-ui__pattern-option {
   appearance: none;
   border: 0;
@@ -271,14 +270,13 @@
 
 .grid-ui__pattern-controls {
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) 42px;
+  grid-template-columns: 42px minmax(0, 1fr);
   gap: 8px;
   align-items: start;
 }
 
 .grid-ui__pattern-action,
 .grid-ui__pattern-trigger,
-.grid-ui__pattern-save,
 .grid-ui__pattern-option {
   appearance: none;
   border: 0;
@@ -287,8 +285,7 @@
 }
 
 .grid-ui__pattern-action,
-.grid-ui__pattern-trigger,
-.grid-ui__pattern-save {
+.grid-ui__pattern-trigger {
   min-height: 42px;
   border: 1px solid var(--grid-ui-border);
   border-radius: 14px;
@@ -300,8 +297,7 @@
     color 160ms ease;
 }
 
-.grid-ui__pattern-action,
-.grid-ui__pattern-save {
+.grid-ui__pattern-action {
   display: grid;
   place-items: center;
   padding: 0;
@@ -320,8 +316,7 @@
 
 .grid-ui__pattern-action:hover,
 .grid-ui__pattern-trigger:hover,
-.grid-ui__pattern-trigger[aria-expanded='true'],
-.grid-ui__pattern-save:hover {
+.grid-ui__pattern-trigger[aria-expanded='true'] {
   border-color: rgba(0, 0, 0, 0.1);
 }
 
@@ -364,8 +359,7 @@
   height: 14px;
 }
 
-.grid-ui__pattern-trigger-chevron,
-.grid-ui__pattern-save-icon {
+.grid-ui__pattern-trigger-chevron {
   width: 14px;
   height: 14px;
   flex: 0 0 14px;
@@ -378,9 +372,6 @@
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-position: center;
   -webkit-mask-size: contain;
-}
-
-.grid-ui__pattern-trigger-chevron {
   color: rgba(31, 31, 32, 0.5);
   transform: rotate(0deg);
   transition:
@@ -396,32 +387,11 @@
   transform: rotate(180deg);
 }
 
-.grid-ui__pattern-save {
-  position: relative;
-  overflow: hidden;
-}
-
-.grid-ui__pattern-save-icon {
-  transition:
-    transform 180ms var(--grid-ui-ease-out),
-    opacity 140ms ease-out,
-    filter 180ms var(--grid-ui-ease-out);
-}
-
-.grid-ui__pattern-save[data-state='saved'] {
-  background: rgba(236, 103, 37, 0.12);
-  border-color: rgba(236, 103, 37, 0.26);
-}
-
-.grid-ui__pattern-save[data-state='saved'] .grid-ui__pattern-save-icon {
-  transform: scale(1.06);
-}
-
 .grid-ui__pattern-menu {
   position: absolute;
   top: calc(100% + 8px);
   left: 50px;
-  right: 50px;
+  right: 0;
   z-index: 6;
   display: grid;
   gap: 10px;
@@ -435,6 +405,8 @@
   -webkit-backdrop-filter: blur(18px);
   overflow-y: auto;
   overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(31, 31, 32, 0.18) transparent;
   opacity: 0;
   filter: blur(4px);
   transform: translateY(-6px) scale(0.98);
@@ -445,6 +417,25 @@
     filter 180ms var(--grid-ui-ease-out);
   visibility: hidden;
   pointer-events: none;
+}
+
+.grid-ui__pattern-menu::-webkit-scrollbar {
+  width: 4px;
+}
+
+.grid-ui__pattern-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.grid-ui__pattern-menu::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(31, 31, 32, 0.18);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .grid-ui__pattern-menu::-webkit-scrollbar-thumb:hover {
+    background: rgba(31, 31, 32, 0.28);
+  }
 }
 
 .grid-ui__pattern-menu[data-open='true'] {
@@ -1175,7 +1166,6 @@
   .grid-ui__menu-item,
   .grid-ui__pattern-action,
   .grid-ui__pattern-trigger,
-  .grid-ui__pattern-save,
   .grid-ui__pattern-menu,
   .grid-ui__pattern-option,
   .grid-ui__pattern-delete,

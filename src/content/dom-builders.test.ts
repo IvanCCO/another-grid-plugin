@@ -118,20 +118,16 @@ describe('createAxisGroup', () => {
 });
 
 describe('createPatternPicker', () => {
-  it('renders add, select, and save controls with asset-backed icons', () => {
+  it('renders add and select controls with asset-backed icons', () => {
     const picker = createPatternPicker();
 
-    expect(picker.field.querySelectorAll('button')).toHaveLength(3);
+    expect(picker.field.querySelectorAll('button')).toHaveLength(2);
     expect(picker.trigger.getAttribute('aria-haspopup')).toBe('menu');
-    expect(picker.saveButton.dataset.state).toBe('idle');
     const chevron = picker.trigger.querySelector(
       '.grid-ui__pattern-trigger-chevron',
     ) as HTMLSpanElement | null;
     expect(chevron?.style.getPropertyValue('--grid-icon-url')).toBe(
       'url("chrome-extension://test-id/assets/chevron.svg")',
-    );
-    expect(picker.saveIcon.style.getPropertyValue('--grid-icon-url')).toBe(
-      'url("chrome-extension://test-id/assets/save.svg")',
     );
   });
 });

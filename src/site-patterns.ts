@@ -13,6 +13,8 @@ export type GridPattern = {
 export type SiteGridState = {
   activePatternId: string;
   patterns: GridPattern[];
+  appearance?: Pick<GridSettings, 'color' | 'opacity'>;
+  session?: Pick<GridSettings, 'enabled' | 'visible' | 'toolbarX' | 'toolbarY'>;
 };
 
 export type GridStorageState = {
@@ -173,6 +175,73 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object';
 }
 
+const PATTERN_SETTING_KEYS = [
+  'axis',
+  'count',
+  'color',
+  'opacity',
+  'distribution',
+  'size',
+  'margin',
+  'gutter',
+] as const satisfies ReadonlyArray<keyof GridSettings>;
+
+function patternSettingsChanged(previous: GridSettings, next: GridSettings): boolean {
+  return PATTERN_SETTING_KEYS.some((key) => previous[key] !== next[key]);
+}
+
+function normalizeAppearance(
+  value: unknown,
+): Pick<GridSettings, 'color' | 'opacity'> | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  return {
+    color: normalizeSettings({ ...DEFAULT_SETTINGS, color: value.color }).color,
+    opacity: normalizeSettings({ ...DEFAULT_SETTINGS, opacity: value.opacity }).opacity,
+  };
+}
+
+function normalizeSession(
+  value: unknown,
+): Pick<GridSettings, 'enabled' | 'visible' | 'toolbarX' | 'toolbarY'> | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  const normalized = normalizeSettings(value);
+  return {
+    enabled: normalized.enabled,
+    visible: normalized.visible,
+    toolbarX: normalized.toolbarX,
+    toolbarY: normalized.toolbarY,
+  };
+}
+
+function mergePresetPattern(
+  pattern: GridPattern,
+  siteState: SiteGridState,
+): GridPattern {
+  const appearance = siteState.appearance ?? {
+    color: DEFAULT_SETTINGS.color,
+    opacity: DEFAULT_SETTINGS.opacity,
+  };
+  const session = siteState.session ?? {};
+
+  return {
+    ...pattern,
+    settings: normalizeSettings({
+      ...pattern.settings,
+      ...appearance,
+      enabled: session.enabled ?? DEFAULT_SETTINGS.enabled,
+      visible: session.visible ?? DEFAULT_SETTINGS.visible,
+      toolbarX: session.toolbarX ?? DEFAULT_SETTINGS.toolbarX,
+      toolbarY: session.toolbarY ?? DEFAULT_SETTINGS.toolbarY,
+    }),
+  };
+}
+
 function getNextVariationNumber(patterns: GridPattern[]): number {
   return (
     patterns.reduce((max, pattern) => {
@@ -256,16 +325,16 @@ function normalizeSiteState(value: unknown, fallbackSettings: GridSettings): Sit
     patterns.unshift(createVariationPattern(patterns, fallbackSettings));
   }
 
-  const activeVariation =
+  const activePattern =
     (typeof value.activePatternId === 'string'
-      ? patterns.find(
-          (pattern) => pattern.id === value.activePatternId && pattern.kind === 'variation',
-        )
+      ? patterns.find((pattern) => pattern.id === value.activePatternId)
       : null) ?? patterns.find((pattern) => pattern.kind === 'variation');
 
   return {
-    activePatternId: activeVariation?.id ?? patterns[0]!.id,
+    activePatternId: activePattern?.id ?? patterns[0]!.id,
     patterns,
+    appearance: normalizeAppearance(value.appearance),
+    session: normalizeSession(value.session),
   };
 }
 
@@ -321,11 +390,16 @@ export function setSiteState(
 }
 
 export function getActivePattern(siteState: SiteGridState): GridPattern {
-  return (
-    siteState.patterns.find((pattern) => pattern.id === siteState.activePatternId) ??
+  const pattern =
+    siteState.patterns.find((entry) => entry.id === siteState.activePatternId) ??
     getFirstVariation(siteState) ??
-    createVariationPattern(createPresetPatterns(), DEFAULT_SETTINGS)
-  );
+    createVariationPattern(createPresetPatterns(), DEFAULT_SETTINGS);
+
+  if (pattern.kind === 'preset') {
+    return mergePresetPattern(pattern, siteState);
+  }
+
+  return pattern;
 }
 
 export function getPatternsForAxis(
@@ -346,6 +420,8 @@ export function selectPattern(siteState: SiteGridState, patternId: string): Site
   return {
     ...siteState,
     activePatternId: patternId,
+    appearance: undefined,
+    session: undefined,
   };
 }
 
@@ -360,6 +436,8 @@ export function ensureAxisPattern(siteState: SiteGridState, axis: GridAxis): Sit
   return {
     activePatternId: nextPattern.id,
     patterns: [nextPattern, ...siteState.patterns],
+    appearance: undefined,
+    session: undefined,
   };
 }
 
@@ -368,10 +446,39 @@ export function updateActivePatternSettings(
   settings: GridSettings,
 ): SiteGridState {
   const normalized = normalizeSettings(settings);
+  const rawActive = siteState.patterns.find((pattern) => pattern.id === siteState.activePatternId);
+
+  if (rawActive?.kind === 'preset') {
+    const currentSettings = getActivePattern(siteState).settings;
+
+    if (!patternSettingsChanged(currentSettings, normalized)) {
+      return {
+        ...siteState,
+        session: {
+          enabled: normalized.enabled,
+          visible: normalized.visible,
+          toolbarX: normalized.toolbarX,
+          toolbarY: normalized.toolbarY,
+        },
+      };
+    }
+
+    const nextPattern = createVariationPattern(siteState.patterns, normalized);
+    return {
+      ...siteState,
+      activePatternId: nextPattern.id,
+      patterns: [nextPattern, ...siteState.patterns],
+      appearance: undefined,
+      session: undefined,
+    };
+  }
+
   const ensuredState = ensureAxisPattern(siteState, normalized.axis);
   return {
     ...ensuredState,
     activePatternId: getActivePattern(ensuredState).id,
+    appearance: undefined,
+    session: undefined,
     patterns: ensuredState.patterns.map((pattern) =>
       pattern.id === ensuredState.activePatternId
         ? {
@@ -394,7 +501,17 @@ export function applyPatternSelection(siteState: SiteGridState, patternId: strin
     return selectPattern(siteState, patternId);
   }
 
-  return updateActivePatternSettings(ensureAxisPattern(siteState, selectedPattern.axis), selectedPattern.settings);
+  const currentSettings = getActivePattern(siteState).settings;
+
+  return {
+    ...siteState,
+    activePatternId: patternId,
+    appearance: {
+      color: currentSettings.color,
+      opacity: currentSettings.opacity,
+    },
+    session: siteState.session,
+  };
 }
 
 export function createVariation(siteState: SiteGridState): SiteGridState {

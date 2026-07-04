@@ -213,38 +213,24 @@ describe('pattern picker', () => {
 
     webTwelve?.click();
 
-    expect(patternLabel.textContent).toBe('Version 1');
-    const frame = (overlay.querySelector('.grid-ui__layer') as HTMLElement).firstElementChild as HTMLElement;
+    expect(patternLabel.textContent).toBe('Web 12');
+    let frame = (overlay.querySelector('.grid-ui__layer') as HTMLElement).firstElementChild as HTMLElement;
     expect(frame.children).toHaveLength(12);
 
-    addButton.click();
+    const countRange = overlay.querySelector('.grid-ui__field--slider input[min="1"][max="24"]') as HTMLInputElement;
+    countRange.value = '10';
+    countRange.dispatchEvent(new Event('input', { bubbles: true }));
 
     expect(patternLabel.textContent).toBe('Version 2');
-    expect(getStoredSettings().count).toBe(12);
-  });
+    frame = (overlay.querySelector('.grid-ui__layer') as HTMLElement).firstElementChild as HTMLElement;
+    expect(frame.children).toHaveLength(10);
 
-  it('flushes save immediately and shows check feedback for 2 seconds', async () => {
-    const { chromeMock } = await loadContentScript();
-    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
-
-    const overlay = getOverlay();
-    const adjustTrigger = overlay.querySelector('.grid-ui__anchor--center') as HTMLButtonElement;
-    const saveButton = overlay.querySelector('.grid-ui__pattern-save') as HTMLButtonElement;
-    const saveIcon = overlay.querySelector('.grid-ui__pattern-save-icon') as HTMLSpanElement;
-
-    adjustTrigger.click();
-    saveButton.click();
+    addButton.click();
     await Promise.resolve();
     await Promise.resolve();
 
-    expect(chromeMock.storage.sync.set).toHaveBeenCalled();
-    expect(saveButton.dataset.state).toBe('saved');
-    expect(saveIcon.style.getPropertyValue('--grid-icon-url')).toContain('check.svg');
-
-    await vi.advanceTimersByTimeAsync(2000);
-
-    expect(saveButton.dataset.state).toBe('idle');
-    expect(saveIcon.style.getPropertyValue('--grid-icon-url')).toContain('save.svg');
+    expect(patternLabel.textContent).toBe('Version 3');
+    expect(getStoredSettings().count).toBe(10);
   });
 });
 
