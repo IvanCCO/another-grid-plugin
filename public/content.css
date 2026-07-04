@@ -193,25 +193,9 @@
   --grid-ui-popover-shift-y: -8px;
 }
 
-.grid-ui__popover-header {
-  display: grid;
-  gap: 5px;
-}
-
 .grid-ui__popover-title {
   font-size: 13px;
   line-height: 1.2;
-}
-
-.grid-ui__popover-subtitle {
-  color: var(--grid-ui-muted);
-  font-size: 11px;
-  line-height: 1.35;
-}
-
-.grid-ui__section-copy {
-  display: grid;
-  gap: 3px;
 }
 
 .grid-ui__section-title {
@@ -220,12 +204,6 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.9);
-}
-
-.grid-ui__section-subtitle {
-  color: var(--grid-ui-muted);
-  font-size: 11px;
-  line-height: 1.35;
 }
 
 .grid-ui__axis-group {

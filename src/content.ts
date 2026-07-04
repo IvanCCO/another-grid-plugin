@@ -210,7 +210,7 @@ function createColorField(): {
   return { field, colorInput, opacityInput, opacityValue };
 }
 
-function createSection(title: string, subtitle: string): HTMLDivElement {
+function createSection(title: string): HTMLDivElement {
   const section = document.createElement('div');
   section.className = 'grid-ui__section-copy';
 
@@ -218,11 +218,7 @@ function createSection(title: string, subtitle: string): HTMLDivElement {
   heading.className = 'grid-ui__section-title';
   heading.textContent = title;
 
-  const text = document.createElement('span');
-  text.className = 'grid-ui__section-subtitle';
-  text.textContent = subtitle;
-
-  section.append(heading, text);
+  section.appendChild(heading);
   return section;
 }
 
@@ -373,18 +369,18 @@ function ensureOverlayUi(): OverlayUi {
 
   generalActions.appendChild(resetButton);
   adjustPopover.append(
-    createPopoverHeader('Adjust grid', 'Density, spacing and appearance'),
-    createSection('Layout', 'Grid mode and distribution'),
+    createPopoverHeader('Adjust grid'),
+    createSection('Layout'),
     adjustAxisGroup,
     distributionField.field,
     createDivider(),
-    createSection('Measurements', 'Quick sizing controls'),
+    createSection('Measurements'),
     countField.field,
     sizeField.field,
     marginField.field,
     gutterField.field,
     createDivider(),
-    createSection('Color', 'Overlay tone and visibility'),
+    createSection('Color'),
     colorField.field,
     generalActions,
   );
@@ -602,7 +598,7 @@ function ensureOverlayUi(): OverlayUi {
   return overlayUi;
 }
 
-function createPopoverHeader(title: string, subtitle: string): HTMLDivElement {
+function createPopoverHeader(title: string): HTMLDivElement {
   const header = document.createElement('div');
   header.className = 'grid-ui__popover-header';
 
@@ -610,11 +606,7 @@ function createPopoverHeader(title: string, subtitle: string): HTMLDivElement {
   heading.className = 'grid-ui__popover-title';
   heading.textContent = title;
 
-  const text = document.createElement('span');
-  text.className = 'grid-ui__popover-subtitle';
-  text.textContent = subtitle;
-
-  header.append(heading, text);
+  header.appendChild(heading);
   return header;
 }
 
