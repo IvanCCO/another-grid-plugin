@@ -30,6 +30,8 @@ const sizeLabel = document.querySelector(
 ) as HTMLSpanElement;
 const sizeHint = document.querySelector('[data-size-hint]') as HTMLSpanElement;
 const statusEl = document.getElementById('status') as HTMLParagraphElement;
+const PERSIST_DELAY_MS = 250;
+let persistTimer: number | null = null;
 
 const AXIS_OPTIONS: Array<{
   value: GridAxis;
@@ -159,11 +161,36 @@ async function notifyActiveTab(settings: GridSettings): Promise<void> {
     .catch(() => undefined);
 }
 
-async function persistAndBroadcast(): Promise<void> {
+async function persistSettings(settings: GridSettings): Promise<void> {
+  await chrome.storage.sync.set({ [STORAGE_KEY]: settings });
+}
+
+function schedulePersist(settings: GridSettings): void {
+  if (persistTimer != null) {
+    window.clearTimeout(persistTimer);
+  }
+
+  persistTimer = window.setTimeout(() => {
+    persistTimer = null;
+    void persistSettings(settings).catch(() => undefined);
+  }, PERSIST_DELAY_MS);
+}
+
+async function persistAndBroadcast(immediate = false): Promise<void> {
   const settings = readForm();
   render(settings);
-  await chrome.storage.sync.set({ [STORAGE_KEY]: settings });
   await notifyActiveTab(settings);
+
+  if (immediate) {
+    if (persistTimer != null) {
+      window.clearTimeout(persistTimer);
+      persistTimer = null;
+    }
+    await persistSettings(settings);
+    return;
+  }
+
+  schedulePersist(settings);
 }
 
 async function persistAxisChange(): Promise<void> {
@@ -173,8 +200,8 @@ async function persistAxisChange(): Promise<void> {
   });
 
   render(settings);
-  await chrome.storage.sync.set({ [STORAGE_KEY]: settings });
   await notifyActiveTab(settings);
+  await persistSettings(settings);
 }
 
 function bindForm(): void {
@@ -195,7 +222,7 @@ function bindForm(): void {
 
   [enabledInput, distributionInput].forEach((control) => {
     control.addEventListener('change', () => {
-      void persistAndBroadcast();
+      void persistAndBroadcast(true);
     });
   });
 
@@ -219,6 +246,16 @@ function bindForm(): void {
     void persistAxisChange();
   });
 }
+
+window.addEventListener('beforeunload', () => {
+  if (persistTimer == null) {
+    return;
+  }
+
+  window.clearTimeout(persistTimer);
+  persistTimer = null;
+  void persistSettings(readForm()).catch(() => undefined);
+});
 
 chrome.storage.sync.get({ [STORAGE_KEY]: DEFAULT_SETTINGS }, (result) => {
   render(normalizeSettings(result[STORAGE_KEY]));
