@@ -22,10 +22,13 @@ type OverlayUi = {
   axisMenu: HTMLDivElement;
   adjustTrigger: HTMLButtonElement;
   adjustPopover: HTMLDivElement;
+  adjustAxisGroup: HTMLDivElement;
   closeTrigger: HTMLButtonElement;
   countValue: HTMLSpanElement;
+  sizeField: HTMLLabelElement;
   sizeLabel: HTMLSpanElement;
   sizeValue: HTMLSpanElement;
+  sizeHint: HTMLSpanElement;
   marginValue: HTMLSpanElement;
   gutterValue: HTMLSpanElement;
   opacityValue: HTMLSpanElement;
@@ -206,6 +209,31 @@ function createSection(title: string, subtitle: string): HTMLDivElement {
   return section;
 }
 
+function createAxisGroup(): HTMLDivElement {
+  const group = document.createElement('div');
+  group.className = 'grid-ui__axis-group';
+  group.setAttribute('role', 'group');
+  group.setAttribute('aria-label', 'Grid type');
+
+  for (const { value, label, icon, rotation } of AXIS_OPTIONS) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'grid-ui__axis-option';
+    button.dataset.axis = value;
+    button.setAttribute('aria-pressed', 'false');
+
+    const iconEl = createIcon(icon, 'grid-ui__axis-option-icon', rotation ?? 0);
+    const text = document.createElement('span');
+    text.className = 'grid-ui__axis-option-label';
+    text.textContent = label;
+
+    button.append(iconEl, text);
+    group.appendChild(button);
+  }
+
+  return group;
+}
+
 function createDivider(): HTMLDivElement {
   const divider = document.createElement('div');
   divider.className = 'grid-ui__divider';
@@ -265,8 +293,13 @@ function ensureOverlayUi(): OverlayUi {
   adjustPopover.className = 'grid-ui__popover';
   adjustPopover.dataset.popover = 'adjust';
 
+  const adjustAxisGroup = createAxisGroup();
   const countField = createSliderField('Count', 1, 24, DEFAULT_SETTINGS.count);
   const sizeField = createSliderField('Width', 1, 400, DEFAULT_SETTINGS.size);
+  const sizeHint = document.createElement('span');
+  sizeHint.className = 'grid-ui__field-hint';
+  sizeHint.textContent = "Track size can't be changed while layout is stretched.";
+  sizeField.field.appendChild(sizeHint);
   const marginField = createSliderField('Margin', 0, 240, DEFAULT_SETTINGS.margin);
   const gutterField = createSliderField('Gutter', 0, 240, DEFAULT_SETTINGS.gutter);
 
@@ -289,14 +322,17 @@ function ensureOverlayUi(): OverlayUi {
   generalActions.appendChild(resetButton);
   adjustPopover.append(
     createPopoverHeader('Adjust grid', 'Density, spacing and appearance'),
-    createSection('Density', 'Quick sizing controls'),
+    createSection('Layout', 'Grid mode and distribution'),
+    adjustAxisGroup,
+    distributionField.field,
+    createDivider(),
+    createSection('Measurements', 'Quick sizing controls'),
     countField.field,
     sizeField.field,
     marginField.field,
     gutterField.field,
     createDivider(),
-    createSection('Appearance', 'Layout and color'),
-    distributionField.field,
+    createSection('Color', 'Overlay tone and visibility'),
     colorField.field,
     generalActions,
   );
@@ -326,6 +362,20 @@ function ensureOverlayUi(): OverlayUi {
 
   adjustTrigger.addEventListener('click', () => {
     togglePopover('adjust');
+  });
+
+  adjustAxisGroup.addEventListener('click', (event) => {
+    const target = (event.target as HTMLElement).closest<HTMLButtonElement>('.grid-ui__axis-option');
+    const axis = target?.dataset.axis as GridAxis | undefined;
+
+    if (!axis) {
+      return;
+    }
+
+    void patchSettings({
+      axis,
+      distribution: axis === currentSettings.axis ? currentSettings.distribution : DEFAULT_SETTINGS.distribution,
+    });
   });
 
   closeTrigger.addEventListener('click', () => {
@@ -381,10 +431,13 @@ function ensureOverlayUi(): OverlayUi {
     axisMenu,
     adjustTrigger,
     adjustPopover,
+    adjustAxisGroup,
     closeTrigger,
     countValue: countField.valueEl,
+    sizeField: sizeField.field,
     sizeLabel: sizeField.field.querySelector('.grid-ui__field-label') as HTMLSpanElement,
     sizeValue: sizeField.valueEl,
+    sizeHint,
     marginValue: marginField.valueEl,
     gutterValue: gutterField.valueEl,
     opacityValue: colorField.opacityValue,
@@ -674,10 +727,28 @@ function renderDistributionOptions(
   );
 }
 
+function renderAdjustAxisGroup(ui: OverlayUi, settings: GridSettings): void {
+  for (const button of Array.from(
+    ui.adjustAxisGroup.querySelectorAll<HTMLButtonElement>('.grid-ui__axis-option'),
+  )) {
+    const active = button.dataset.axis === settings.axis;
+    button.dataset.active = String(active);
+    button.setAttribute('aria-pressed', String(active));
+  }
+}
+
+function updateSizeAvailability(ui: OverlayUi, settings: GridSettings): void {
+  const disabled = settings.distribution === 'stretch';
+  ui.sizeRange.disabled = disabled;
+  ui.sizeField.dataset.disabled = String(disabled);
+  ui.sizeHint.hidden = !disabled;
+}
+
 function renderController(settings: GridSettings): void {
   const ui = ensureOverlayUi();
   renderAxisMenu(ui, settings);
   renderDistributionOptions(ui.distributionSelect, settings);
+  renderAdjustAxisGroup(ui, settings);
 
   const axisMeta = AXIS_OPTIONS.find((option) => option.value === settings.axis) ?? AXIS_OPTIONS[0];
   ui.axisTriggerIcon.style.setProperty(
@@ -706,6 +777,7 @@ function renderController(settings: GridSettings): void {
   ui.marginValue.textContent = String(settings.margin);
   ui.gutterValue.textContent = String(settings.gutter);
   ui.opacityValue.textContent = `${settings.opacity}%`;
+  updateSizeAvailability(ui, settings);
 }
 
 function renderOverlay(settings: GridSettings): void {
