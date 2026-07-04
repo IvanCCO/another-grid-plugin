@@ -420,7 +420,12 @@ function ensureOverlayUi(): OverlayUi {
   resetButton.textContent = 'Reset defaults';
   resetButton.addEventListener('click', () => {
     void applySettings(
-      { ...DEFAULT_SETTINGS, enabled: true },
+      {
+        ...DEFAULT_SETTINGS,
+        enabled: true,
+        toolbarX: currentSettings.toolbarX,
+        toolbarY: currentSettings.toolbarY,
+      },
       { immediatePersist: true },
     );
   });
