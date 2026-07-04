@@ -1,2 +1,2 @@
-# another-grid-plugin
-Have easily managed grid in every website
+# grid-systems-overlay
+Browser extension that overlays configurable column and row grids on any page.
