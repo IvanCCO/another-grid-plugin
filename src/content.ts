@@ -6,7 +6,6 @@ import {
   type GridAxis,
   type GridDistribution,
   type GridSettings,
-  getAxisLabel,
   getDistributionOptions,
   getFixedTrackSpan,
   getSizeLabel,
@@ -26,7 +25,6 @@ type OverlayUi = {
   moreTrigger: HTMLButtonElement;
   morePopover: HTMLDivElement;
   closeTrigger: HTMLButtonElement;
-  status: HTMLDivElement;
   countValue: HTMLSpanElement;
   sizeLabel: HTMLSpanElement;
   sizeValue: HTMLSpanElement;
@@ -203,9 +201,6 @@ function ensureOverlayUi(): OverlayUi {
   controller.setAttribute('role', 'toolbar');
   controller.setAttribute('aria-label', 'Grid overlay controls');
 
-  const status = document.createElement('div');
-  status.className = 'grid-ui__status';
-
   const axisTrigger = createButton(
     'Change grid orientation',
     createIcon('grid.svg', 'grid-ui__button-icon'),
@@ -292,7 +287,7 @@ function ensureOverlayUi(): OverlayUi {
     generalActions,
   );
 
-  controller.append(status, axisTrigger, adjustTrigger, moreTrigger, closeTrigger);
+  controller.append(axisTrigger, adjustTrigger, moreTrigger, closeTrigger);
   root.append(gridLayer, controller, axisMenu, adjustPopover, morePopover);
   (document.body ?? document.documentElement).appendChild(root);
 
@@ -370,7 +365,6 @@ function ensureOverlayUi(): OverlayUi {
     moreTrigger,
     morePopover,
     closeTrigger,
-    status,
     countValue: countField.valueEl,
     sizeLabel: sizeField.field.querySelector('.grid-ui__field-label') as HTMLSpanElement,
     sizeValue: sizeField.valueEl,
@@ -662,8 +656,6 @@ function renderController(settings: GridSettings): void {
     '--grid-icon-rotation',
     `${axisMeta.rotation ?? 0}deg`,
   );
-
-  ui.status.textContent = `${axisMeta.label} · ${settings.count} · ${getAxisLabel(settings.axis)}`;
 
   ui.countRange.value = String(settings.count);
   ui.sizeRange.value = String(settings.size);

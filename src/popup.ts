@@ -24,9 +24,6 @@ const advancedToggle = document.getElementById(
   'advanced-toggle',
 ) as HTMLButtonElement;
 const advancedPanel = document.getElementById('advanced-panel') as HTMLDivElement;
-const statusEl = document.getElementById('status') as HTMLParagraphElement;
-const hintEl = document.getElementById('hint') as HTMLParagraphElement;
-const unsupportedEl = document.getElementById('unsupported') as HTMLParagraphElement;
 
 const axisPicker = document.getElementById('axis-picker') as HTMLDivElement;
 const axisInput = document.getElementById('axis') as HTMLSelectElement;
@@ -159,7 +156,6 @@ function render(settings: GridSettings): void {
 
   const axisMeta =
     AXIS_OPTIONS.find((option) => option.value === settings.axis) ?? AXIS_OPTIONS[0];
-  const supported = isSupportedTabUrl(currentTabUrl);
 
   enabledToggle.dataset.enabled = String(settings.enabled);
   enabledToggle.setAttribute('aria-pressed', String(settings.enabled));
@@ -168,14 +164,6 @@ function render(settings: GridSettings): void {
   quickAxisLabel.textContent = axisMeta.label;
   quickAxisIcon.style.setProperty('--icon-url', `url("${axisMeta.icon}")`);
   quickAxisIcon.style.setProperty('--icon-rotation', axisMeta.rotation ?? '0deg');
-
-  statusEl.textContent = settings.enabled
-    ? `Overlay ativo em ${axisMeta.label.toLowerCase()}`
-    : 'Overlay desligado';
-  hintEl.textContent = supported
-    ? 'A barra flutuante aparece na página atual.'
-    : 'Abra um site comum para usar a barra flutuante.';
-  unsupportedEl.hidden = supported;
 
   axisInput.value = settings.axis;
   renderAxisPicker(settings.axis);

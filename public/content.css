@@ -49,30 +49,6 @@
   -webkit-backdrop-filter: blur(18px);
 }
 
-.grid-ui__status {
-  max-width: 0;
-  overflow: hidden;
-  color: var(--grid-ui-muted);
-  font-size: 11px;
-  line-height: 1;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  opacity: 0;
-  transform: translateX(6px);
-  transition:
-    max-width 220ms var(--grid-ui-ease-out),
-    opacity 180ms ease-out,
-    transform 220ms var(--grid-ui-ease-out);
-}
-
-#grid-systems-overlay:hover .grid-ui__status,
-#grid-systems-overlay:focus-within .grid-ui__status {
-  max-width: 180px;
-  opacity: 1;
-  transform: translateX(0);
-}
-
 .grid-ui__button,
 .grid-ui__close,
 .grid-ui__menu-item,
@@ -334,7 +310,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .grid-ui__status,
   .grid-ui__button,
   .grid-ui__close,
   .grid-ui__popover,
