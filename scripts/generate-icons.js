@@ -14,9 +14,9 @@ const zlib = require('zlib');
 const fs = require('fs');
 const path = require('path');
 
-// Orange grid tile (#F97316 — vivid orange) with black grid lines.
+// Orange grid tile (#F97316 — vivid orange) with white grid lines.
 const ORANGE = [0xf9, 0x71, 0x16];
-const LINE = [0x00, 0x00, 0x00];
+const LINE = [0xff, 0xff, 0xff];
 
 /** CRC32 implementation (as specified in the PNG standard). */
 function crc32(buf) {
@@ -74,7 +74,7 @@ function samplePixel(fx, fy) {
 
   // Grid lines split the tile into a 3x3 grid (two internal lines each way).
   const span = x1 - x0;
-  const halfThickness = 0.03;
+  const halfThickness = 0.015;
   for (let i = 1; i <= 2; i++) {
     const lineX = x0 + (span * i) / 3;
     const lineY = y0 + (span * i) / 3;

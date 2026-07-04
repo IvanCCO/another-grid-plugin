@@ -206,20 +206,35 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
+.grid-ui__layout-section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.grid-ui__layout-column {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
 .grid-ui__axis-group {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
 }
 
 .grid-ui__axis-option {
   appearance: none;
-  display: grid;
-  gap: 8px;
-  justify-items: start;
-  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  min-width: 32px;
+  min-height: 32px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
+  border-radius: 10px;
   background: rgba(255, 255, 255, 0.03);
   color: var(--grid-ui-text);
   cursor: pointer;
@@ -236,8 +251,8 @@
 }
 
 .grid-ui__axis-option-icon {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   background: currentColor;
   mask-image: var(--grid-icon-url);
   mask-repeat: no-repeat;
@@ -250,9 +265,50 @@
   transform: rotate(var(--grid-icon-rotation, 0deg));
 }
 
-.grid-ui__axis-option-label {
-  font-size: 12px;
-  line-height: 1.1;
+.grid-ui__distribution-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.grid-ui__distribution-option {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  min-width: 32px;
+  min-height: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--grid-ui-text);
+  cursor: pointer;
+  transition:
+    transform 140ms ease-out,
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.grid-ui__distribution-option:hover,
+.grid-ui__distribution-option[aria-pressed='true'] {
+  border-color: rgba(255, 138, 61, 0.35);
+  background: rgba(255, 138, 61, 0.12);
+}
+
+.grid-ui__distribution-icon {
+  width: 14px;
+  height: 14px;
+  background: currentColor;
+  mask-image: var(--grid-icon-url);
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  -webkit-mask-image: var(--grid-icon-url);
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  transform: rotate(var(--grid-icon-rotation, 0deg));
 }
 
 .grid-ui__divider {
