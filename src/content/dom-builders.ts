@@ -307,6 +307,8 @@ export function createPatternPicker(): {
   addButton: HTMLButtonElement;
   trigger: HTMLButtonElement;
   triggerLabel: HTMLSpanElement;
+  saveButton: HTMLButtonElement;
+  saveIcon: HTMLSpanElement;
   menu: HTMLDivElement;
   menuSiteTitle: HTMLSpanElement;
   variationSection: HTMLDivElement;
@@ -314,6 +316,9 @@ export function createPatternPicker(): {
 } {
   const field = document.createElement('div');
   field.className = 'grid-ui__pattern-picker';
+
+  const controls = document.createElement('div');
+  controls.className = 'grid-ui__pattern-controls';
 
   const addButton = document.createElement('button');
   addButton.type = 'button';
@@ -331,11 +336,20 @@ export function createPatternPicker(): {
   triggerLabel.className = 'grid-ui__pattern-trigger-label';
   triggerLabel.textContent = 'Version 1';
 
-  const chevron = document.createElement('span');
-  chevron.className = 'grid-ui__pattern-trigger-chevron';
+  const chevron = createIcon('chevron.svg', 'grid-ui__pattern-trigger-chevron');
   chevron.setAttribute('aria-hidden', 'true');
 
   trigger.append(triggerLabel, chevron);
+
+  const saveButton = document.createElement('button');
+  saveButton.type = 'button';
+  saveButton.className = 'grid-ui__pattern-save';
+  saveButton.setAttribute('aria-label', 'Save current configuration');
+  saveButton.dataset.state = 'idle';
+
+  const saveIcon = createIcon('save.svg', 'grid-ui__pattern-save-icon');
+  saveIcon.setAttribute('aria-hidden', 'true');
+  saveButton.appendChild(saveIcon);
 
   const menu = document.createElement('div');
   menu.className = 'grid-ui__pattern-menu';
@@ -353,13 +367,16 @@ export function createPatternPicker(): {
   presetSection.className = 'grid-ui__pattern-menu-section';
 
   menu.append(menuSiteTitle, variationSection, presetSection);
-  field.append(addButton, trigger, menu);
+  controls.append(addButton, trigger, saveButton);
+  field.append(controls, menu);
 
   return {
     field,
     addButton,
     trigger,
     triggerLabel,
+    saveButton,
+    saveIcon,
     menu,
     menuSiteTitle,
     variationSection,

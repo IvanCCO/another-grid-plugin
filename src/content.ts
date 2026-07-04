@@ -67,6 +67,8 @@ type OverlayUi = {
   patternAddButton: HTMLButtonElement;
   patternTrigger: HTMLButtonElement;
   patternTriggerLabel: HTMLSpanElement;
+  patternSaveButton: HTMLButtonElement;
+  patternSaveIcon: HTMLSpanElement;
   patternMenu: HTMLDivElement;
   patternMenuSiteTitle: HTMLSpanElement;
   patternVariationSection: HTMLDivElement;
@@ -108,7 +110,9 @@ let activePopover: PopoverName | null = null;
 let isDocumentEventsBound = false;
 let isPatternMenuOpen = false;
 const PERSIST_DELAY_MS = 250;
+const SAVE_FEEDBACK_MS = 2000;
 let persistTimer = 0;
+let saveFeedbackTimer = 0;
 let dragState: DragState | null = null;
 let suppressClickUntil = 0;
 
@@ -116,6 +120,7 @@ const DRAG_THRESHOLD_PX = 6;
 
 function removeOverlay(): void {
   window.clearTimeout(persistTimer);
+  window.clearTimeout(saveFeedbackTimer);
   overlayUi?.root.remove();
   overlayUi = null;
   activePopover = null;
@@ -139,6 +144,27 @@ function setPatternMenuOpen(open: boolean): void {
 
   ui.patternMenu.dataset.open = String(isPatternMenuOpen);
   ui.patternTrigger.setAttribute('aria-expanded', String(isPatternMenuOpen));
+}
+
+function setPatternSaveState(state: 'idle' | 'saved'): void {
+  const ui = overlayUi;
+  if (!ui) {
+    return;
+  }
+
+  ui.patternSaveButton.dataset.state = state;
+  ui.patternSaveIcon.style.setProperty(
+    '--grid-icon-url',
+    `url("${getAssetUrl(state === 'saved' ? 'check.svg' : 'save.svg')}")`,
+  );
+}
+
+function showPatternSavedFeedback(): void {
+  window.clearTimeout(saveFeedbackTimer);
+  setPatternSaveState('saved');
+  saveFeedbackTimer = window.setTimeout(() => {
+    setPatternSaveState('idle');
+  }, SAVE_FEEDBACK_MS);
 }
 
 function applyControllerPosition(ui: OverlayUi, x: number, y: number): void {
@@ -325,6 +351,16 @@ function ensureOverlayUi(): OverlayUi {
     setPatternMenuOpen(!isPatternMenuOpen);
   });
 
+  patternPicker.saveButton.addEventListener('click', () => {
+    setPatternMenuOpen(false);
+    window.clearTimeout(persistTimer);
+    void persistSettings()
+      .then(() => {
+        showPatternSavedFeedback();
+      })
+      .catch(() => undefined);
+  });
+
   adjustAxisGroup.addEventListener('click', (event) => {
     const target = (event.target as HTMLElement).closest<HTMLButtonElement>('.grid-ui__axis-option');
     const axis = target?.dataset.axis as GridAxis | undefined;
@@ -489,6 +525,8 @@ function ensureOverlayUi(): OverlayUi {
     patternAddButton: patternPicker.addButton,
     patternTrigger: patternPicker.trigger,
     patternTriggerLabel: patternPicker.triggerLabel,
+    patternSaveButton: patternPicker.saveButton,
+    patternSaveIcon: patternPicker.saveIcon,
     patternMenu: patternPicker.menu,
     patternMenuSiteTitle: patternPicker.menuSiteTitle,
     patternVariationSection: patternPicker.variationSection,
@@ -637,6 +675,7 @@ function renderController(settings: GridSettings): void {
   ui.axisTrigger.setAttribute('aria-label', settings.visible ? 'Hide overlay' : 'Show overlay');
   ui.axisTrigger.dataset.state = settings.visible ? 'visible' : 'hidden';
   ui.patternTriggerLabel.textContent = activePattern.name;
+  setPatternSaveState(ui.patternSaveButton.dataset.state === 'saved' ? 'saved' : 'idle');
   const controllerPosition = getControllerPosition(settings, ui);
   applyControllerPosition(ui, controllerPosition.x, controllerPosition.y);
 
