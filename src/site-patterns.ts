@@ -227,7 +227,8 @@ function mergePresetPattern(
     color: DEFAULT_SETTINGS.color,
     opacity: DEFAULT_SETTINGS.opacity,
   };
-  const session = siteState.session ?? {};
+  const session: Partial<Pick<GridSettings, 'enabled' | 'visible' | 'toolbarX' | 'toolbarY'>> =
+    siteState.session ?? {};
 
   return {
     ...pattern,
