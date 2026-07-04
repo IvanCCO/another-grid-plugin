@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_SETTINGS } from './utils';
+import { DEFAULT_SETTINGS, type GridAxis } from './utils';
 import {
   applyPatternSelection,
+  createVariation,
+  deleteVariation,
   ensureAxisPattern,
   getActivePattern,
   getPatternsForAxis,
@@ -42,5 +44,31 @@ describe('site patterns', () => {
     expect(activePattern.settings.count).toBe(12);
     expect(preservedPreset?.kind).toBe('preset');
     expect(preservedPreset?.settings.count).toBe(12);
+  });
+
+  it('removes a variation and falls back to another version on the same axis', () => {
+    const storage = normalizeGridStorage(DEFAULT_SETTINGS, SITE_KEY);
+    let siteState = getSiteState(storage, SITE_KEY);
+    siteState = createVariation(siteState);
+    siteState = createVariation(siteState);
+
+    const axisVariations = getPatternsForAxis(siteState, 'columns', 'variation');
+    expect(axisVariations).toHaveLength(3);
+
+    const deletedId = axisVariations[0]!.id;
+    const nextState = deleteVariation(siteState, deletedId, 'columns');
+
+    expect(nextState).not.toBeNull();
+    expect(getPatternsForAxis(nextState!, 'columns', 'variation')).toHaveLength(2);
+    expect(nextState!.patterns.some((pattern) => pattern.id === deletedId)).toBe(false);
+    expect(getActivePattern(nextState!).id).not.toBe(deletedId);
+  });
+
+  it('does not delete the last variation for an axis', () => {
+    const storage = normalizeGridStorage(DEFAULT_SETTINGS, SITE_KEY);
+    const siteState = getSiteState(storage, SITE_KEY);
+    const onlyVariation = getPatternsForAxis(siteState, 'columns', 'variation')[0]!;
+
+    expect(deleteVariation(siteState, onlyVariation.id, 'columns')).toBeNull();
   });
 });

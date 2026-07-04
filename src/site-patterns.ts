@@ -404,3 +404,28 @@ export function createVariation(siteState: SiteGridState): SiteGridState {
     patterns: [nextPattern, ...siteState.patterns],
   };
 }
+
+export function deleteVariation(
+  siteState: SiteGridState,
+  patternId: string,
+  axis: GridAxis,
+): SiteGridState | null {
+  const pattern = siteState.patterns.find((entry) => entry.id === patternId);
+  if (!pattern || pattern.kind !== 'variation' || pattern.axis !== axis) {
+    return null;
+  }
+
+  const axisVariations = getPatternsForAxis(siteState, axis, 'variation');
+  if (axisVariations.length <= 1) {
+    return null;
+  }
+
+  const fallbackVariation =
+    axisVariations.find((entry) => entry.id !== patternId) ?? axisVariations[0]!;
+
+  return {
+    activePatternId:
+      siteState.activePatternId === patternId ? fallbackVariation.id : siteState.activePatternId,
+    patterns: siteState.patterns.filter((entry) => entry.id !== patternId),
+  };
+}

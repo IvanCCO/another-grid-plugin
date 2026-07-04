@@ -384,6 +384,49 @@ export function createPatternPicker(): {
   };
 }
 
+function bindHoldToDelete(
+  button: HTMLButtonElement,
+  fill: HTMLSpanElement,
+  onComplete: () => void,
+): void {
+  let armed = false;
+
+  const disarm = () => {
+    armed = false;
+    button.dataset.holding = 'false';
+    fill.removeEventListener('transitionend', handleFillComplete);
+  };
+
+  const handleFillComplete = (event: TransitionEvent) => {
+    if (!armed || event.target !== fill || event.propertyName !== 'clip-path') {
+      return;
+    }
+
+    disarm();
+    onComplete();
+  };
+
+  button.addEventListener('pointerdown', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    armed = true;
+    button.dataset.holding = 'true';
+    button.setPointerCapture(event.pointerId);
+    fill.addEventListener('transitionend', handleFillComplete);
+  });
+
+  const cancelHold = () => {
+    if (!armed) {
+      return;
+    }
+    disarm();
+  };
+
+  button.addEventListener('pointerup', cancelHold);
+  button.addEventListener('pointercancel', cancelHold);
+  button.addEventListener('lostpointercapture', cancelHold);
+}
+
 function createPatternMenuButton(
   pattern: GridPattern,
   activePatternId: string,
@@ -403,6 +446,55 @@ function createPatternMenuButton(
   return button;
 }
 
+function createVariationMenuRow(
+  pattern: GridPattern,
+  activePatternId: string,
+  canDelete: boolean,
+  onSelect: (patternId: string) => void,
+  onDelete: (patternId: string) => void,
+): HTMLDivElement {
+  const row = document.createElement('div');
+  row.className = 'grid-ui__pattern-option-row';
+  row.dataset.patternId = pattern.id;
+  row.dataset.active = String(pattern.id === activePatternId);
+  row.dataset.kind = 'variation';
+
+  const selectButton = document.createElement('button');
+  selectButton.type = 'button';
+  selectButton.className = 'grid-ui__pattern-option';
+  selectButton.setAttribute('role', 'menuitemradio');
+  selectButton.setAttribute('aria-checked', String(pattern.id === activePatternId));
+  selectButton.textContent = pattern.name;
+  selectButton.addEventListener('click', () => {
+    onSelect(pattern.id);
+  });
+
+  row.appendChild(selectButton);
+
+  if (canDelete) {
+    const deleteButton = document.createElement('button');
+    deleteButton.type = 'button';
+    deleteButton.className = 'grid-ui__pattern-delete';
+    deleteButton.setAttribute('aria-label', `Hold to delete ${pattern.name}`);
+    deleteButton.dataset.holding = 'false';
+
+    const fill = document.createElement('span');
+    fill.className = 'grid-ui__pattern-delete-fill';
+    fill.setAttribute('aria-hidden', 'true');
+
+    const icon = createIcon('trash.svg', 'grid-ui__pattern-delete-icon');
+    icon.setAttribute('aria-hidden', 'true');
+
+    deleteButton.append(fill, icon);
+    bindHoldToDelete(deleteButton, fill, () => {
+      onDelete(pattern.id);
+    });
+    row.appendChild(deleteButton);
+  }
+
+  return row;
+}
+
 function renderPatternMenuSection(
   section: HTMLDivElement,
   title: string,
@@ -410,6 +502,7 @@ function renderPatternMenuSection(
   patterns: GridPattern[],
   activePatternId: string,
   onSelect: (patternId: string) => void,
+  onDelete?: (patternId: string) => void,
 ): void {
   section.replaceChildren();
   section.hidden = patterns.length === 0;
@@ -420,8 +513,24 @@ function renderPatternMenuSection(
 
   const list = document.createElement('div');
   list.className = 'grid-ui__pattern-option-list';
+  const canDeleteVariations =
+    Boolean(onDelete) &&
+    patterns.filter((pattern) => pattern.kind === 'variation').length > 1;
 
   for (const pattern of patterns) {
+    if (pattern.kind === 'variation' && onDelete) {
+      list.appendChild(
+        createVariationMenuRow(
+          pattern,
+          activePatternId,
+          canDeleteVariations,
+          onSelect,
+          onDelete,
+        ),
+      );
+      continue;
+    }
+
     list.appendChild(createPatternMenuButton(pattern, activePatternId, onSelect));
   }
 
@@ -445,6 +554,7 @@ export function renderPatternPickerMenu(
     variations: GridPattern[];
     presets: GridPattern[];
     onSelect: (patternId: string) => void;
+    onDelete?: (patternId: string) => void;
   },
 ): void {
   renderPatternMenuSection(
@@ -454,6 +564,7 @@ export function renderPatternPickerMenu(
     options.variations,
     options.activePatternId,
     options.onSelect,
+    options.onDelete,
   );
   renderPatternMenuSection(
     presetSection,

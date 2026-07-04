@@ -11,6 +11,7 @@ import {
 import {
   applyPatternSelection,
   createVariation,
+  deleteVariation,
   ensureAxisPattern,
   getActivePattern,
   getPatternsForAxis,
@@ -630,6 +631,45 @@ function renderController(settings: GridSettings): void {
       void applySiteState(applyPatternSelection(currentSiteState, patternId), {
         immediatePersist: true,
       });
+    },
+    onDelete: (patternId) => {
+      const nextState = deleteVariation(currentSiteState, patternId, settings.axis);
+      if (!nextState) {
+        return;
+      }
+
+      const row = ui.patternVariationSection.querySelector(
+        `.grid-ui__pattern-option-row[data-pattern-id="${patternId}"]`,
+      ) as HTMLElement | null;
+
+      let committed = false;
+      const commitDelete = () => {
+        if (committed) {
+          return;
+        }
+        committed = true;
+        void applySiteState(nextState, { immediatePersist: true }).then(() => {
+          setPatternMenuOpen(true);
+        });
+      };
+
+      if (!row) {
+        commitDelete();
+        return;
+      }
+
+      row.dataset.exiting = 'true';
+      row.addEventListener(
+        'transitionend',
+        (event) => {
+          if (event.target !== row) {
+            return;
+          }
+          commitDelete();
+        },
+        { once: true },
+      );
+      window.setTimeout(commitDelete, 220);
     },
   });
   renderAxisGroup(ui.adjustAxisGroup, settings.axis);

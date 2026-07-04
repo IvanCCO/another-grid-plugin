@@ -13,6 +13,7 @@
   --grid-ui-orange: #ec6725;
   --grid-ui-orange-soft: rgba(236, 103, 37, 0.18);
   --grid-ui-orange-sheen: rgba(236, 103, 37, 0.1);
+  --grid-ui-delete-hold-ms: 2000;
   --grid-ui-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --grid-ui-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   position: fixed;
@@ -518,6 +519,121 @@
   color: var(--grid-ui-text);
 }
 
+.grid-ui__pattern-option-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 32px;
+  border-radius: 10px;
+  padding-right: 2px;
+  overflow: hidden;
+  transition:
+    opacity 180ms var(--grid-ui-ease-out),
+    transform 180ms var(--grid-ui-ease-out),
+    max-height 200ms var(--grid-ui-ease-out),
+    min-height 200ms var(--grid-ui-ease-out),
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.grid-ui__pattern-option-row[data-active='true'] {
+  background: rgba(236, 103, 37, 0.12);
+}
+
+.grid-ui__pattern-option-row[data-active='true'] .grid-ui__pattern-option {
+  color: var(--grid-ui-text);
+}
+
+.grid-ui__pattern-option-row[data-exiting='true'] {
+  opacity: 0;
+  transform: translateX(-6px);
+  max-height: 0;
+  min-height: 0;
+  pointer-events: none;
+}
+
+.grid-ui__pattern-option-row .grid-ui__pattern-option {
+  flex: 1;
+  min-width: 0;
+  padding-right: 4px;
+}
+
+.grid-ui__pattern-option-row .grid-ui__pattern-option[data-active='true'] {
+  background: transparent;
+}
+
+.grid-ui__pattern-delete {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  appearance: none;
+  border: 0;
+  border-radius: 8px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+  transition:
+    opacity 140ms ease-out,
+    background 160ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .grid-ui__pattern-delete:hover {
+    background: var(--grid-ui-surface);
+  }
+}
+
+.grid-ui__pattern-option-row:hover .grid-ui__pattern-delete,
+.grid-ui__pattern-option-row:focus-within .grid-ui__pattern-delete,
+.grid-ui__pattern-delete[data-holding='true'] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.grid-ui__pattern-delete-fill {
+  position: absolute;
+  inset: 0;
+  background: #dc3c3c;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 200ms var(--grid-ui-ease-out);
+}
+
+.grid-ui__pattern-delete:active .grid-ui__pattern-delete-fill,
+.grid-ui__pattern-delete[data-holding='true'] .grid-ui__pattern-delete-fill {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path calc(var(--grid-ui-delete-hold-ms) * 1ms) linear;
+}
+
+.grid-ui__pattern-delete-icon {
+  position: relative;
+  z-index: 1;
+  width: 13px;
+  height: 13px;
+  background: currentColor;
+  color: var(--grid-ui-muted);
+  mask-image: var(--grid-icon-url);
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  -webkit-mask-image: var(--grid-icon-url);
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  transition: color 160ms ease;
+}
+
+.grid-ui__pattern-delete:active .grid-ui__pattern-delete-icon,
+.grid-ui__pattern-delete[data-holding='true'] .grid-ui__pattern-delete-icon {
+  color: #fff;
+}
+
 .grid-ui__section-title {
   font-size: 11px;
   line-height: 1.1;
@@ -998,15 +1114,28 @@
   color: var(--grid-ui-text);
 }
 
+.grid-ui__pattern-option-row .grid-ui__pattern-option:hover {
+  background: transparent;
+  color: var(--grid-ui-muted);
+}
+
+.grid-ui__pattern-option-row[data-active='true'] .grid-ui__pattern-option:hover {
+  color: var(--grid-ui-text);
+}
+
 @media (hover: hover) and (pointer: fine) {
   .grid-ui__button:hover,
-  .grid-ui__pattern-option:hover,
+  .grid-ui__pattern-option-list > .grid-ui__pattern-option:hover,
   .grid-ui__menu-item:hover {
     transform: translateY(-1px);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  #grid-systems-overlay {
+    --grid-ui-delete-hold-ms: 1000;
+  }
+
   .grid-ui__button,
   .grid-ui__close,
   .grid-ui__popover,
@@ -1016,7 +1145,13 @@
   .grid-ui__pattern-save,
   .grid-ui__pattern-menu,
   .grid-ui__pattern-option,
+  .grid-ui__pattern-delete,
+  .grid-ui__pattern-delete-fill,
   .grid-ui__pattern-trigger-chevron {
+    transition-duration: 1ms;
+  }
+
+  .grid-ui__pattern-option-row[data-exiting='true'] {
     transition-duration: 1ms;
   }
 }
