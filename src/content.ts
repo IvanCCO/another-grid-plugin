@@ -203,26 +203,17 @@ function createSelectField(
 }
 
 function createColorField(): {
-  field: HTMLLabelElement;
+  field: HTMLDivElement;
   colorInput: HTMLInputElement;
   opacityInput: HTMLInputElement;
   opacityValue: HTMLSpanElement;
 } {
-  const field = document.createElement('label');
+  const field = document.createElement('div');
   field.className = 'grid-ui__field';
 
-  const row = document.createElement('span');
-  row.className = 'grid-ui__field-row';
-
-  const title = document.createElement('span');
-  title.className = 'grid-ui__field-label';
-  title.textContent = 'Color';
-
   const opacityValue = document.createElement('span');
-  opacityValue.className = 'grid-ui__field-value';
+  opacityValue.className = 'grid-ui__section-value';
   opacityValue.textContent = '12%';
-
-  row.append(title, opacityValue);
 
   const stack = document.createElement('span');
   stack.className = 'grid-ui__color-stack';
@@ -231,6 +222,17 @@ function createColorField(): {
   colorInput.className = 'grid-ui__color';
   colorInput.type = 'color';
 
+  const sliderField = document.createElement('span');
+  sliderField.className = 'grid-ui__field grid-ui__field--slider grid-ui__field--slider--compact';
+
+  const ruler = document.createElement('span');
+  ruler.className = 'grid-ui__slider-ruler';
+  ruler.setAttribute('aria-hidden', 'true');
+
+  const handle = document.createElement('span');
+  handle.className = 'grid-ui__slider-handle';
+  handle.setAttribute('aria-hidden', 'true');
+
   const opacityInput = document.createElement('input');
   opacityInput.className = 'grid-ui__range';
   opacityInput.type = 'range';
@@ -238,13 +240,17 @@ function createColorField(): {
   opacityInput.max = '100';
   opacityInput.step = '1';
 
-  stack.append(colorInput, opacityInput);
-  field.append(row, stack);
+  sliderField.append(ruler, handle, opacityInput);
+
+  stack.append(colorInput, sliderField);
+  field.append(stack);
+
+  updateSliderVisual(opacityInput);
 
   return { field, colorInput, opacityInput, opacityValue };
 }
 
-function createSection(title: string): HTMLDivElement {
+function createSection(title: string, trailing?: HTMLElement): HTMLDivElement {
   const section = document.createElement('div');
   section.className = 'grid-ui__section-copy';
 
@@ -252,7 +258,7 @@ function createSection(title: string): HTMLDivElement {
   heading.className = 'grid-ui__section-title';
   heading.textContent = title;
 
-  section.appendChild(heading);
+  section.append(heading, ...(trailing ? [trailing] : []));
   return section;
 }
 
@@ -437,6 +443,7 @@ function ensureOverlayUi(): OverlayUi {
     marginField.field,
     gutterField.field,
     createDivider(),
+    createSection('Color', colorField.opacityValue),
     colorField.field,
     generalActions,
   );

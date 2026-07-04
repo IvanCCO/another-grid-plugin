@@ -12,6 +12,12 @@
       "sourceType": "github",
       "computedHash": "879436797b8c35a063dc89a04b4182975114c5baf9dbf692455b7ed164420f9e"
     },
+    "design-md": {
+      "source": "google-labs-code/stitch-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/stitch-utilities/skills/design-md/SKILL.md",
+      "computedHash": "d3a4c7d2f2715a33662c8b06ffc16035d01965a8b4ed81c2958fb22ae94760f8"
+    },
     "emil-design-eng": {
       "source": "emilkowalski/skill",
       "sourceType": "github",

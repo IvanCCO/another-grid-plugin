@@ -211,6 +211,21 @@
   color: rgba(28, 28, 30, 0.72);
 }
 
+.grid-ui__section-copy {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.grid-ui__section-value {
+  color: var(--grid-ui-text);
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
 .grid-ui__layout-section {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -452,8 +467,8 @@
   background:
     repeating-linear-gradient(
       90deg,
-      transparent 0 11px,
-      var(--grid-ui-text) 11px 12px
+      transparent 0 17px,
+      var(--grid-ui-text) 17px 18px
     );
   opacity: 0.12;
 }
@@ -462,8 +477,8 @@
   background:
     repeating-linear-gradient(
       90deg,
-      transparent 0 55px,
-      var(--grid-ui-text) 55px 57px
+      transparent 0 76px,
+      var(--grid-ui-text) 76px 78px
     );
   opacity: 0.2;
 }
@@ -477,16 +492,18 @@
   height: 26px;
   border-radius: 999px;
   background: var(--grid-ui-accent);
+  opacity: 0;
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.08),
     0 6px 14px rgba(0, 0, 0, 0.18);
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) scaleY(0.92);
   transition:
     left 180ms var(--grid-ui-ease-out),
+    opacity 140ms var(--grid-ui-ease-out),
     background 160ms ease,
     height 160ms var(--grid-ui-ease-out),
     box-shadow 180ms var(--grid-ui-ease-out),
-    transform 140ms var(--grid-ui-ease-out);
+    transform 180ms var(--grid-ui-ease-out);
   pointer-events: none;
 }
 
@@ -498,14 +515,14 @@
 }
 
 .grid-ui__field-label {
-  color: rgba(255, 255, 255, 0.96);
+  color: var(--grid-ui-text);
   font-size: 13px;
   letter-spacing: -0.01em;
   text-transform: none;
 }
 
 .grid-ui__field-value {
-  color: rgba(255, 255, 255, 0.96);
+  color: var(--grid-ui-text);
   font-size: 12px;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -543,19 +560,45 @@
   cursor: default;
 }
 
-.grid-ui__field--slider:hover .grid-ui__slider-handle,
 .grid-ui__field--slider:focus-within .grid-ui__slider-handle {
   height: 30px;
   background: var(--grid-ui-accent);
+  opacity: 1;
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.1),
     0 8px 18px rgba(0, 0, 0, 0.22);
+  transform: translate(-50%, -50%) scaleY(1);
 }
 
-.grid-ui__field--slider:hover .grid-ui__slider-ruler,
 .grid-ui__field--slider:focus-within .grid-ui__slider-ruler {
   opacity: 1;
   transform: scaleX(1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .grid-ui__field--slider:hover .grid-ui__slider-handle {
+    height: 30px;
+    background: var(--grid-ui-accent);
+    opacity: 1;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.1),
+      0 8px 18px rgba(0, 0, 0, 0.22);
+    transform: translate(-50%, -50%) scaleY(1);
+  }
+
+  .grid-ui__field--slider:hover .grid-ui__slider-ruler {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grid-ui__slider-handle,
+  .grid-ui__slider-ruler {
+    transition:
+      opacity 120ms ease,
+      left 120ms ease;
+  }
 }
 
 .grid-ui__field--slider:active {
@@ -570,6 +613,33 @@
 
 .grid-ui__field--slider[data-disabled='true'] .grid-ui__field-label {
   color: rgba(28, 28, 30, 0.38);
+}
+
+.grid-ui__field--slider--compact {
+  min-height: 34px;
+  border-radius: 12px;
+}
+
+.grid-ui__field--slider--compact::before {
+  clip-path: inset(0 calc(100% - (var(--slider-percent) * 1%)) 0 0 round 12px);
+}
+
+.grid-ui__field--slider--compact .grid-ui__slider-ruler {
+  height: 14px;
+}
+
+.grid-ui__field--slider--compact .grid-ui__slider-handle {
+  height: 20px;
+}
+
+.grid-ui__field--slider--compact:focus-within .grid-ui__slider-handle {
+  height: 24px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .grid-ui__field--slider--compact:hover .grid-ui__slider-handle {
+    height: 24px;
+  }
 }
 
 .grid-ui__select {
@@ -591,9 +661,9 @@
 .grid-ui__color {
   height: 34px;
   padding: 0;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
+  border: 1px solid var(--grid-ui-border);
+  border-radius: 12px;
+  background: var(--grid-ui-panel);
 }
 
 .grid-ui__actions {
