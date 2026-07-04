@@ -51,9 +51,6 @@ The overall aesthetic is minimalist and utilitarian with polished micro-interact
   Used for selected/open states in popup controls.
 - **Popup Orange** (`#F28C28`)  
   Used as the enabled-state accent in the popup toggle.
-- **Default Overlay Red** (`#FF3B30`)  
-  Used as the starting grid color value in settings and utility fallbacks.
-
 ## 3. Typography Rules
 - The system uses `SF Pro Display`, falling back to `Segoe UI`, `system-ui`, and platform sans-serifs.
 - Primary control labels use compact, high-legibility sans typography with low line-height and minimal tracking.
@@ -70,7 +67,7 @@ The overall aesthetic is minimalist and utilitarian with polished micro-interact
 
 ## 5. Layout Principles
 - Spacing is compact but breathable. Most control groups sit in `6px`, `8px`, `10px`, `12px`, `14px`, and `16px` increments.
-- The overlay panel favors stacked sections with dividers rather than deep nesting.
+- The overlay panel favors stacked sections with spacing and section headings rather than heavy structural chrome.
 - Rounded corners establish hierarchy:
   - **Full pill** for micro-controls and toggle capsules
   - **18px** for major popovers/cards

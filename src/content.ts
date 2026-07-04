@@ -305,13 +305,6 @@ function createDistributionGroup(): HTMLDivElement {
   return group;
 }
 
-function createDivider(): HTMLDivElement {
-  const divider = document.createElement('div');
-  divider.className = 'grid-ui__divider';
-  divider.setAttribute('aria-hidden', 'true');
-  return divider;
-}
-
 function clampControllerPosition(
   x: number,
   y: number,
@@ -436,13 +429,11 @@ function ensureOverlayUi(): OverlayUi {
   adjustPopover.append(
     createPopoverHeader('Adjust grid'),
     layoutSection,
-    createDivider(),
     createSection('Measurements'),
     countField.field,
     sizeField.field,
     marginField.field,
     gutterField.field,
-    createDivider(),
     createSection('Color', colorField.opacityValue),
     colorField.field,
     generalActions,

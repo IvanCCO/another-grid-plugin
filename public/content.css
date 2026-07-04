@@ -331,11 +331,6 @@
   transform: rotate(var(--grid-icon-rotation, 0deg));
 }
 
-.grid-ui__divider {
-  height: 1px;
-  background: var(--grid-ui-border);
-}
-
 .grid-ui__menu-item {
   display: grid;
   grid-template-columns: 18px minmax(0, 1fr);

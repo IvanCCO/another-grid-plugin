@@ -42,7 +42,7 @@ export const DEFAULT_SETTINGS: GridSettings = {
   toolbarY: null,
   axis: 'columns',
   count: 6,
-  color: '#FF3B30',
+  color: '#FF8A3D',
   opacity: 12,
   distribution: 'stretch',
   size: 72,
@@ -209,7 +209,7 @@ export function normalizeSettings(value: unknown): GridSettings {
 export function toRgba(hex: string, opacity: number): string {
   const normalized = normalizeColor(hex);
   const match = normalized.match(/^#(..)(..)(..)$/);
-  if (!match) return 'rgba(255, 59, 48, 0.12)';
+  if (!match) return 'rgba(255, 138, 61, 0.12)';
 
   const [, red, green, blue] = match;
   return `rgba(${parseInt(red, 16)}, ${parseInt(green, 16)}, ${parseInt(blue, 16)}, ${
