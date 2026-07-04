@@ -1,4 +1,5 @@
-import { type GridAxis, type GridDistribution, getDistributionOptions } from '../utils';
+import { type GridPattern } from '../site-patterns';
+import { type GridAxis, type GridDistribution, type GridPreset, getDistributionOptions } from '../utils';
 
 export const AXIS_OPTIONS: Array<{
   value: GridAxis;
@@ -292,6 +293,248 @@ export function createPopoverHeader(): {
 
   header.append(badge, heading);
   return { header, badge, icon, fallback, title: heading };
+}
+
+export function createPlusIcon(): HTMLSpanElement {
+  const icon = document.createElement('span');
+  icon.className = 'grid-ui__plus-icon';
+  icon.setAttribute('aria-hidden', 'true');
+  return icon;
+}
+
+export function createPresetPicker(): {
+  field: HTMLDivElement;
+  createButton: HTMLButtonElement;
+  trigger: HTMLButtonElement;
+  triggerLabel: HTMLSpanElement;
+  menu: HTMLDivElement;
+} {
+  const field = document.createElement('div');
+  field.className = 'grid-ui__preset-picker';
+
+  const createButton = document.createElement('button');
+  createButton.type = 'button';
+  createButton.className = 'grid-ui__preset-create';
+  createButton.setAttribute('aria-label', 'Create variation for this site');
+  createButton.appendChild(createPlusIcon());
+
+  const selector = document.createElement('div');
+  selector.className = 'grid-ui__preset-select';
+
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'grid-ui__preset-trigger';
+  trigger.setAttribute('aria-haspopup', 'listbox');
+  trigger.setAttribute('aria-expanded', 'false');
+
+  const triggerLabel = document.createElement('span');
+  triggerLabel.className = 'grid-ui__preset-trigger-label';
+  triggerLabel.textContent = 'Version 1';
+
+  const chevron = document.createElement('span');
+  chevron.className = 'grid-ui__preset-chevron';
+  chevron.setAttribute('aria-hidden', 'true');
+
+  trigger.append(triggerLabel, chevron);
+
+  const menu = document.createElement('div');
+  menu.className = 'grid-ui__preset-menu';
+  menu.setAttribute('role', 'listbox');
+  menu.dataset.open = 'false';
+
+  selector.append(trigger, menu);
+  field.append(createButton, selector);
+
+  return {
+    field,
+    createButton,
+    trigger,
+    triggerLabel,
+    menu,
+  };
+}
+
+export function renderPresetPicker(
+  menu: HTMLDivElement,
+  groups: Array<{
+    title: string;
+    tone?: 'hard' | 'soft';
+    items: GridPreset[];
+  }>,
+  selectedPresetId: string | null,
+  onSelect: (presetId: string) => void,
+): void {
+  menu.replaceChildren();
+
+  for (const group of groups) {
+    if (group.items.length === 0) {
+      continue;
+    }
+
+    const section = document.createElement('div');
+    section.className = 'grid-ui__preset-group';
+
+    const title = document.createElement('strong');
+    title.className = 'grid-ui__preset-group-title';
+    title.dataset.tone = group.tone ?? 'soft';
+    title.textContent = group.title;
+    section.appendChild(title);
+
+    for (const preset of group.items) {
+      const option = document.createElement('button');
+      option.type = 'button';
+      option.className = 'grid-ui__preset-option';
+      option.setAttribute('role', 'option');
+      option.setAttribute('aria-selected', String(preset.id === selectedPresetId));
+      option.dataset.selected = String(preset.id === selectedPresetId);
+      option.dataset.presetId = preset.id;
+      option.textContent = preset.name;
+      option.addEventListener('click', () => {
+        onSelect(preset.id);
+      });
+      section.appendChild(option);
+    }
+
+    menu.appendChild(section);
+  }
+}
+
+export function createPatternPicker(): {
+  field: HTMLDivElement;
+  addButton: HTMLButtonElement;
+  trigger: HTMLButtonElement;
+  triggerLabel: HTMLSpanElement;
+  menu: HTMLDivElement;
+  menuSiteTitle: HTMLSpanElement;
+  variationSection: HTMLDivElement;
+  presetSection: HTMLDivElement;
+} {
+  const field = document.createElement('div');
+  field.className = 'grid-ui__pattern-picker';
+
+  const addButton = document.createElement('button');
+  addButton.type = 'button';
+  addButton.className = 'grid-ui__pattern-action';
+  addButton.setAttribute('aria-label', 'Create a new variation');
+  addButton.textContent = '+';
+
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'grid-ui__pattern-trigger';
+  trigger.setAttribute('aria-haspopup', 'menu');
+  trigger.setAttribute('aria-expanded', 'false');
+
+  const triggerLabel = document.createElement('span');
+  triggerLabel.className = 'grid-ui__pattern-trigger-label';
+  triggerLabel.textContent = 'Version 1';
+
+  const chevron = document.createElement('span');
+  chevron.className = 'grid-ui__pattern-trigger-chevron';
+  chevron.setAttribute('aria-hidden', 'true');
+
+  trigger.append(triggerLabel, chevron);
+
+  const menu = document.createElement('div');
+  menu.className = 'grid-ui__pattern-menu';
+  menu.setAttribute('role', 'menu');
+  menu.dataset.open = 'false';
+
+  const menuSiteTitle = document.createElement('strong');
+  menuSiteTitle.className = 'grid-ui__pattern-menu-title';
+  menuSiteTitle.textContent = 'Website';
+
+  const variationSection = document.createElement('div');
+  variationSection.className = 'grid-ui__pattern-menu-section';
+
+  const presetSection = document.createElement('div');
+  presetSection.className = 'grid-ui__pattern-menu-section';
+
+  menu.append(menuSiteTitle, variationSection, presetSection);
+  field.append(addButton, trigger, menu);
+
+  return {
+    field,
+    addButton,
+    trigger,
+    triggerLabel,
+    menu,
+    menuSiteTitle,
+    variationSection,
+    presetSection,
+  };
+}
+
+function createPatternMenuButton(
+  pattern: GridPattern,
+  activePatternId: string,
+  onSelect: (patternId: string) => void,
+): HTMLButtonElement {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'grid-ui__pattern-option';
+  button.dataset.active = String(pattern.id === activePatternId);
+  button.setAttribute('role', 'menuitemradio');
+  button.setAttribute('aria-checked', String(pattern.id === activePatternId));
+  button.textContent = pattern.name;
+  button.addEventListener('click', () => {
+    onSelect(pattern.id);
+  });
+  return button;
+}
+
+function renderPatternMenuSection(
+  section: HTMLDivElement,
+  title: string,
+  patterns: GridPattern[],
+  activePatternId: string,
+  onSelect: (patternId: string) => void,
+): void {
+  section.replaceChildren();
+  section.hidden = patterns.length === 0;
+
+  if (patterns.length === 0) {
+    return;
+  }
+
+  const heading = document.createElement('strong');
+  heading.className = 'grid-ui__pattern-group-title';
+  heading.textContent = title;
+
+  const list = document.createElement('div');
+  list.className = 'grid-ui__pattern-option-list';
+
+  for (const pattern of patterns) {
+    list.appendChild(createPatternMenuButton(pattern, activePatternId, onSelect));
+  }
+
+  section.append(heading, list);
+}
+
+export function renderPatternPickerMenu(
+  variationSection: HTMLDivElement,
+  presetSection: HTMLDivElement,
+  options: {
+    siteName: string;
+    activePatternId: string;
+    variations: GridPattern[];
+    presets: GridPattern[];
+    onSelect: (patternId: string) => void;
+  },
+): void {
+  renderPatternMenuSection(
+    variationSection,
+    options.siteName,
+    options.variations,
+    options.activePatternId,
+    options.onSelect,
+  );
+  renderPatternMenuSection(
+    presetSection,
+    'Defaults',
+    options.presets,
+    options.activePatternId,
+    options.onSelect,
+  );
 }
 
 export function renderDistributionGroup(

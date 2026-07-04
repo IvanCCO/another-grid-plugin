@@ -42,6 +42,11 @@ Assume this project should be built like a production-quality browser extension:
 - predictable messaging and persistence
 - compatibility with Manifest V3 patterns
 
+## Minimal Implementation
+On any coding task — writing, refactoring, fixing, reviewing, or choosing dependencies — always use the [`ponytail`](./.agents/skills/ponytail/SKILL.md) skill as the default approach.
+
+Reach for the shortest working solution: question whether work is needed at all (YAGNI), reuse what already exists in the codebase, prefer stdlib and native platform features over new dependencies, and keep diffs as small as the problem allows.
+
 ## Working Style
 Before coding, identify the leanest and clearest solution.
 
@@ -61,7 +66,8 @@ Avoid:
 ## Practical Default
 When working on this repository:
 
-1. read `DESIGN.md` first for any UI-facing change
-2. use `emil-design-eng` for animation and polish decisions
-3. use `chrome-extension-development` for extension architecture and implementation decisions
-4. preserve the Muller-Brockmann-inspired grid logic: disciplined, rational, minimal
+1. use `ponytail` for any coding task — simplest solution that actually works
+2. read `DESIGN.md` first for any UI-facing change
+3. use `emil-design-eng` for animation and polish decisions
+4. use `chrome-extension-development` for extension architecture and implementation decisions
+5. preserve the Muller-Brockmann-inspired grid logic: disciplined, rational, minimal
