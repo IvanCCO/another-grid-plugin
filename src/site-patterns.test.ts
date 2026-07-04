@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_SETTINGS, type GridAxis } from './utils';
+import { DEFAULT_SETTINGS } from './utils';
 import {
   applyPatternSelection,
   createVariation,

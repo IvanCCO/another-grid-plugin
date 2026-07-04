@@ -1,0 +1,16 @@
+---
+alwaysApply: false
+---
+
+Solve the CI bugs, like lint, typecheck and tests.
+You must not change the functionality — only change the code to make it compile. If there is a business logic problem, do not change it; ask the user what to do instead.
+
+Run the same validation steps as `.github/workflows/pr.yml` (excluding build, package, and artifact upload):
+
+```bash
+npm ci
+npm run lint
+npm test
+```
+
+Fix every failure before finishing. Do not skip lint or tests.
