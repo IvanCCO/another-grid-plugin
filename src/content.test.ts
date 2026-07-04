@@ -336,21 +336,25 @@ describe('background/popup messaging', () => {
     const adjustTrigger = overlay.querySelector('.grid-ui__anchor--center') as HTMLButtonElement;
     adjustTrigger.click();
 
-    expect(overlay.querySelector('.grid-ui__layout-section')?.hidden).toBe(false);
+    expect((overlay.querySelector('.grid-ui__layout-section') as HTMLElement | null)?.hidden).toBe(false);
     expect(overlay.querySelector('.grid-ui__distribution-group')?.children).toHaveLength(0);
     const typeTitle = Array.from(overlay.querySelectorAll('.grid-ui__section-title')).find(
       (title) => title.textContent === 'TYPE',
-    );
+    ) as HTMLElement | undefined;
     expect(typeTitle?.hidden).toBe(true);
-    expect(overlay.querySelector('.grid-ui__section-copy')?.hidden).toBe(true);
-    expect(overlay.querySelector('.grid-ui__field--slider input[min="1"][max="24"]')?.closest('label')?.hidden).toBe(true);
-    expect(overlay.querySelector('.grid-ui__field--slider input[min="0"][max="240"]')?.closest('label')?.hidden).toBe(true);
+    expect((overlay.querySelector('.grid-ui__section-copy') as HTMLElement | null)?.hidden).toBe(true);
+    expect(
+      (overlay.querySelector('.grid-ui__field--slider input[min="1"][max="24"]')?.closest('label') as HTMLLabelElement | null)?.hidden,
+    ).toBe(true);
+    expect(
+      (overlay.querySelector('.grid-ui__field--slider input[min="0"][max="240"]')?.closest('label') as HTMLLabelElement | null)?.hidden,
+    ).toBe(true);
 
     const sizeField = Array.from(overlay.querySelectorAll('.grid-ui__field-label')).find(
       (label) => label.textContent === 'Size',
-    )?.closest('label');
+    )?.closest('label') as HTMLLabelElement | undefined;
     expect(sizeField?.hidden).toBe(false);
-    expect(overlay.querySelector('.grid-ui__field--slider--color')?.hidden).toBe(false);
+    expect((overlay.querySelector('.grid-ui__field--slider--color') as HTMLElement | null)?.hidden).toBe(false);
   });
 
   it('ignores messages with an unrelated type', async () => {
