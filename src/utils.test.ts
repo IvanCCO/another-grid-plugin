@@ -16,12 +16,14 @@ describe('normalizeSettings', () => {
   it('normalizes row settings and keeps only supported distributions', () => {
     expect(
       normalizeSettings({
+        visible: false,
         axis: 'rows',
         distribution: 'bottom',
         count: '5',
         opacity: '24',
       }),
     ).toMatchObject({
+      visible: false,
       axis: 'rows',
       distribution: 'bottom',
       count: 5,

@@ -19,7 +19,6 @@ type OverlayUi = {
   controller: HTMLDivElement;
   axisTrigger: HTMLButtonElement;
   axisTriggerIcon: HTMLSpanElement;
-  axisMenu: HTMLDivElement;
   adjustTrigger: HTMLButtonElement;
   adjustPopover: HTMLDivElement;
   adjustAxisGroup: HTMLDivElement;
@@ -55,7 +54,7 @@ const AXIS_OPTIONS: Array<{
 let overlayUi: OverlayUi | null = null;
 let currentSettings = DEFAULT_SETTINGS;
 let resizeFrame = 0;
-let activePopover: 'axis' | 'adjust' | null = null;
+let activePopover: 'adjust' | null = null;
 let isDocumentEventsBound = false;
 const PERSIST_DELAY_MS = 250;
 let persistTimer = 0;
@@ -260,13 +259,11 @@ function ensureOverlayUi(): OverlayUi {
   controller.setAttribute('aria-label', 'Grid overlay controls');
 
   const axisTrigger = createButton(
-    'Change grid orientation',
-    createIcon('grid.svg', 'grid-ui__button-icon'),
+    'Hide overlay',
+    createIcon('open-eye.svg', 'grid-ui__button-icon'),
     'grid-ui__button--primary',
   );
   axisTrigger.classList.add('grid-ui__anchor', 'grid-ui__anchor--start');
-  axisTrigger.setAttribute('aria-haspopup', 'menu');
-  axisTrigger.setAttribute('aria-expanded', 'false');
 
   const axisTriggerIcon = axisTrigger.firstChild as HTMLSpanElement;
 
@@ -283,11 +280,6 @@ function ensureOverlayUi(): OverlayUi {
   closeTrigger.className = 'grid-ui__close';
   closeTrigger.setAttribute('aria-label', 'Disable grid overlay');
   closeTrigger.textContent = '×';
-
-  const axisMenu = document.createElement('div');
-  axisMenu.className = 'grid-ui__popover grid-ui__popover--menu';
-  axisMenu.dataset.popover = 'axis';
-  axisMenu.setAttribute('role', 'menu');
 
   const adjustPopover = document.createElement('div');
   adjustPopover.className = 'grid-ui__popover';
@@ -338,7 +330,7 @@ function ensureOverlayUi(): OverlayUi {
   );
 
   controller.append(axisTrigger, adjustTrigger, closeTrigger);
-  root.append(gridLayer, controller, axisMenu, adjustPopover);
+  root.append(gridLayer, controller, adjustPopover);
   (document.body ?? document.documentElement).appendChild(root);
 
   root.addEventListener('pointerleave', () => {
@@ -357,7 +349,8 @@ function ensureOverlayUi(): OverlayUi {
   }
 
   axisTrigger.addEventListener('click', () => {
-    togglePopover('axis');
+    setActivePopover(null);
+    void patchSettings({ visible: !currentSettings.visible });
   });
 
   adjustTrigger.addEventListener('click', () => {
@@ -428,7 +421,6 @@ function ensureOverlayUi(): OverlayUi {
     controller,
     axisTrigger,
     axisTriggerIcon,
-    axisMenu,
     adjustTrigger,
     adjustPopover,
     adjustAxisGroup,
@@ -507,7 +499,6 @@ function setActivePopover(next: typeof activePopover): void {
   }
 
   const popovers: Array<[typeof activePopover, HTMLDivElement, HTMLButtonElement]> = [
-    ['axis', ui.axisMenu, ui.axisTrigger],
     ['adjust', ui.adjustPopover, ui.adjustTrigger],
   ];
 
@@ -538,10 +529,7 @@ function positionPopover(
   let left = rect.right - width;
   let originX = '100%';
 
-  if (name === 'axis') {
-    left = rect.left;
-    originX = '0%';
-  } else if (name === 'adjust') {
+  if (name === 'adjust') {
     left = rect.left + rect.width / 2 - width / 2;
     originX = '50%';
   }
@@ -670,48 +658,6 @@ function applySquareGrid(root: HTMLDivElement, settings: GridSettings): void {
   root.appendChild(frame);
 }
 
-function renderAxisMenu(ui: OverlayUi, settings: GridSettings): void {
-  ui.axisMenu.replaceChildren(
-    createPopoverHeader('Grid mode', 'Quiet controls, fast switching'),
-    ...AXIS_OPTIONS.map(({ value, label, icon, rotation }) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'grid-ui__menu-item';
-      button.dataset.active = String(settings.axis === value);
-
-      const iconEl = createIcon(icon, 'grid-ui__menu-icon', rotation ?? 0);
-      const textWrap = document.createElement('span');
-      textWrap.className = 'grid-ui__menu-copy';
-
-      const title = document.createElement('span');
-      title.className = 'grid-ui__menu-title';
-      title.textContent = label;
-
-      const hint = document.createElement('span');
-      hint.className = 'grid-ui__menu-hint';
-      hint.textContent =
-        value === 'columns'
-          ? 'Measure by columns'
-          : value === 'rows'
-            ? 'Measure by rows'
-            : 'Square overlay';
-
-      textWrap.append(title, hint);
-      button.append(iconEl, textWrap);
-
-      button.addEventListener('click', () => {
-        void patchSettings({
-          axis: value,
-          distribution: value === settings.axis ? settings.distribution : DEFAULT_SETTINGS.distribution,
-        });
-        setActivePopover(null);
-      });
-
-      return button;
-    }),
-  );
-}
-
 function renderDistributionOptions(
   select: HTMLSelectElement,
   settings: GridSettings,
@@ -746,19 +692,18 @@ function updateSizeAvailability(ui: OverlayUi, settings: GridSettings): void {
 
 function renderController(settings: GridSettings): void {
   const ui = ensureOverlayUi();
-  renderAxisMenu(ui, settings);
   renderDistributionOptions(ui.distributionSelect, settings);
   renderAdjustAxisGroup(ui, settings);
-
-  const axisMeta = AXIS_OPTIONS.find((option) => option.value === settings.axis) ?? AXIS_OPTIONS[0];
   ui.axisTriggerIcon.style.setProperty(
     '--grid-icon-url',
-    `url("${getAssetUrl(axisMeta.icon)}")`,
+    `url("${getAssetUrl(settings.visible ? 'open-eye.svg' : 'closed-eye.svg')}")`,
   );
   ui.axisTriggerIcon.style.setProperty(
     '--grid-icon-rotation',
-    `${axisMeta.rotation ?? 0}deg`,
+    '0deg',
   );
+  ui.axisTrigger.setAttribute('aria-label', settings.visible ? 'Hide overlay' : 'Show overlay');
+  ui.axisTrigger.dataset.state = settings.visible ? 'visible' : 'hidden';
 
   ui.countRange.value = String(settings.count);
   ui.sizeRange.value = String(settings.size);
@@ -789,6 +734,7 @@ function renderOverlay(settings: GridSettings): void {
   const ui = ensureOverlayUi();
   const root = ui.gridLayer;
   root.replaceChildren();
+  root.style.opacity = settings.visible ? '1' : '0';
 
   if (settings.axis === 'grid') {
     applySquareGrid(root, settings);

@@ -25,6 +25,8 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
+  opacity: 1;
+  transition: opacity 180ms var(--grid-ui-ease-out);
 }
 
 .grid-ui__controller,
@@ -95,6 +97,11 @@
 
 .grid-ui__button--primary {
   background: rgba(255, 255, 255, 0.08);
+}
+
+.grid-ui__button--primary[data-state='hidden'] {
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(245, 247, 250, 0.72);
 }
 
 .grid-ui__button-icon,

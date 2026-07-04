@@ -13,6 +13,7 @@ export type GridDistribution =
 
 export interface GridSettings {
   enabled: boolean;
+  visible: boolean;
   axis: GridAxis;
   count: number;
   color: string;
@@ -34,6 +35,7 @@ const MAX_SPACING = 240;
 
 export const DEFAULT_SETTINGS: GridSettings = {
   enabled: true,
+  visible: true,
   axis: 'columns',
   count: 6,
   color: '#FF3B30',
@@ -154,6 +156,10 @@ export function normalizeSettings(value: unknown): GridSettings {
       typeof source.enabled === 'boolean'
         ? source.enabled
         : DEFAULT_SETTINGS.enabled,
+    visible:
+      typeof source.visible === 'boolean'
+        ? source.visible
+        : DEFAULT_SETTINGS.visible,
     axis,
     count: clamp(
       Math.round(parseNumber(source.count, DEFAULT_SETTINGS.count)),
