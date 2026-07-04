@@ -1,12 +1,9 @@
 # Design System: Grid Systems Overlay
 **Project ID:** Local repository analysis only (`grid-systems-overlay`)  
-**Source:** `public/content.css`, `public/popup.html`, `src/utils.ts`
+**Source:** `public/content.css`, `src/utils.ts`, `src/content.ts`
 
 ## 1. Visual Theme & Atmosphere
-This interface lives in two related but distinct visual modes:
-
-- The in-page overlay is a light, frosted utility surface. It feels precise, compact, and quietly technical rather than decorative.
-- The browser popup is warmer and slightly softer. It uses a cream-tinted canvas and brighter controls to feel more app-like and approachable.
+This interface is a light, frosted utility surface layered directly on top of any webpage. It feels precise, compact, and quietly technical rather than decorative.
 
 The overall aesthetic is minimalist and utilitarian with polished micro-interactions. Rounded geometry, translucent whites, soft shadows, and a restrained orange accent keep the tool visible without overpowering the page it sits on top of.
 
@@ -34,23 +31,6 @@ The overall aesthetic is minimalist and utilitarian with polished micro-interact
 - **Signal Orange Sheen** (`rgba(255, 138, 61, 0.10)`)  
   Used to soften the active slider gradient and keep the accent airy.
 
-### Popup palette
-- **Warm Canvas** (`#F4F3EF`)  
-  Used for the popup page background.
-- **Pure Panel White** (`#FFFFFF`)  
-  Used for cards, sliders, and primary popup surfaces.
-- **Soft Ivory Panel** (`#F6F6F3`)  
-  Used for secondary button surfaces like the quick-axis control.
-- **Popup Text Ink** (`#111827`)  
-  Used for primary text and toggle dots.
-- **Popup Muted Gray** (`#6B7280`)  
-  Used for supporting labels and section headings.
-- **Action Blue** (`#1F8FFF`)  
-  Used as the popup’s interactive accent.
-- **Action Blue Wash** (`rgba(31, 143, 255, 0.12)`)  
-  Used for selected/open states in popup controls.
-- **Popup Orange** (`#F28C28`)  
-  Used as the enabled-state accent in the popup toggle.
 ## 3. Typography Rules
 - The system uses `SF Pro Display`, falling back to `Segoe UI`, `system-ui`, and platform sans-serifs.
 - Primary control labels use compact, high-legibility sans typography with low line-height and minimal tracking.

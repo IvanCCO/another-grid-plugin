@@ -45,11 +45,10 @@ function copyDir(src, dest) {
   }
 }
 
-/** Copy static assets (manifest, CSS, HTML, icons) into dist/. */
+/** Copy static assets (manifest, CSS, icons) into dist/. */
 function copyAssets() {
   copyFile(path.join(ROOT, 'manifest.json'),          path.join(DIST, 'manifest.json'));
   copyFile(path.join(ROOT, 'public', 'content.css'),  path.join(DIST, 'content.css'));
-  copyFile(path.join(ROOT, 'public', 'popup.html'),   path.join(DIST, 'popup.html'));
   copyDir(path.join(ROOT, 'public', 'assets'),        path.join(DIST, 'assets'));
 
   const iconsDir = path.join(ROOT, 'icons');
@@ -91,13 +90,7 @@ async function build() {
       outfile: path.join(DIST, 'background.js'),
     });
 
-    const popupCtx = await esbuild.context({
-      ...sharedOptions,
-      entryPoints: [path.join(ROOT, 'src', 'popup.ts')],
-      outfile: path.join(DIST, 'popup.js'),
-    });
-
-    await Promise.all([contentCtx.watch(), backgroundCtx.watch(), popupCtx.watch()]);
+    await Promise.all([contentCtx.watch(), backgroundCtx.watch()]);
     console.log('Watching for changes…');
   } else {
     await Promise.all([
@@ -110,11 +103,6 @@ async function build() {
         ...sharedOptions,
         entryPoints: [path.join(ROOT, 'src', 'background.ts')],
         outfile: path.join(DIST, 'background.js'),
-      }),
-      esbuild.build({
-        ...sharedOptions,
-        entryPoints: [path.join(ROOT, 'src', 'popup.ts')],
-        outfile: path.join(DIST, 'popup.js'),
       }),
     ]);
 
