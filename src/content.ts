@@ -264,31 +264,10 @@ function ensureOverlayUi(): OverlayUi {
   const gutterField = createSliderField('Gutter', 0, 240, DEFAULT_SETTINGS.gutter);
 
   const colorField = createColorField();
-  const generalActions = document.createElement('div');
-  generalActions.className = 'grid-ui__actions';
-
-  const resetButton = document.createElement('button');
-  resetButton.type = 'button';
-  resetButton.className = 'grid-ui__text-button';
-  resetButton.textContent = 'Reset defaults';
-  resetButton.addEventListener('click', () => {
-    setPatternMenuOpen(false);
-    void applySettings(
-      {
-        ...DEFAULT_SETTINGS,
-        enabled: true,
-        axis: currentSettings.axis,
-        toolbarX: currentSettings.toolbarX,
-        toolbarY: currentSettings.toolbarY,
-      },
-      { immediatePersist: true },
-    );
-  });
 
   const popoverHeader = createPopoverHeader();
   const patternPicker = createPatternPicker();
 
-  generalActions.appendChild(resetButton);
   adjustPopover.append(
     popoverHeader.header,
     patternPicker.field,
@@ -299,7 +278,6 @@ function ensureOverlayUi(): OverlayUi {
     marginField.field,
     gutterField.field,
     colorField.field,
-    generalActions,
   );
 
   controller.append(axisTrigger, adjustTrigger, closeTrigger);

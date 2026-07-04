@@ -458,7 +458,7 @@ export function renderPatternPickerMenu(
   renderPatternMenuSection(
     presetSection,
     'Defaults',
-    'soft',
+    'hard',
     options.presets,
     options.activePatternId,
     options.onSelect,

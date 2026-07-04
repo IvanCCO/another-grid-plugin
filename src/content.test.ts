@@ -222,6 +222,30 @@ describe('pattern picker', () => {
     expect(patternLabel.textContent).toBe('Version 2');
     expect(getStoredSettings().count).toBe(12);
   });
+
+  it('flushes save immediately and shows check feedback for 2 seconds', async () => {
+    const { chromeMock } = await loadContentScript();
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+
+    const overlay = getOverlay();
+    const adjustTrigger = overlay.querySelector('.grid-ui__anchor--center') as HTMLButtonElement;
+    const saveButton = overlay.querySelector('.grid-ui__pattern-save') as HTMLButtonElement;
+    const saveIcon = overlay.querySelector('.grid-ui__pattern-save-icon') as HTMLSpanElement;
+
+    adjustTrigger.click();
+    saveButton.click();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(chromeMock.storage.sync.set).toHaveBeenCalled();
+    expect(saveButton.dataset.state).toBe('saved');
+    expect(saveIcon.style.getPropertyValue('--grid-icon-url')).toContain('check.svg');
+
+    await vi.advanceTimersByTimeAsync(2000);
+
+    expect(saveButton.dataset.state).toBe('idle');
+    expect(saveIcon.style.getPropertyValue('--grid-icon-url')).toContain('save.svg');
+  });
 });
 
 describe('measurement controls', () => {
@@ -281,7 +305,7 @@ describe('axis switching', () => {
   });
 });
 
-describe('disabling and resetting', () => {
+describe('disabling', () => {
   it('removes the overlay from the DOM and persists enabled:false immediately when closed', async () => {
     const { chromeMock, getStoredSettings } = await loadContentScript();
     const overlay = getOverlay();
@@ -293,23 +317,6 @@ describe('disabling and resetting', () => {
     expect(document.getElementById(GRID_OVERLAY_ID)).toBeNull();
     expect(chromeMock.storage.sync.set).toHaveBeenCalled();
     expect(getStoredSettings().enabled).toBe(false);
-  });
-
-  it('restores default measurements but keeps the current toolbar position on reset', async () => {
-    const { getStoredSettings } = await loadContentScript({ toolbarX: 42, toolbarY: 84 });
-    const overlay = getOverlay();
-    const countRange = overlay.querySelector('.grid-ui__field--slider input[min="1"][max="24"]') as HTMLInputElement;
-    countRange.value = '20';
-    countRange.dispatchEvent(new Event('input'));
-
-    const resetButton = overlay.querySelector('.grid-ui__text-button') as HTMLButtonElement;
-    resetButton.click();
-    await flushPromises();
-
-    const stored = getStoredSettings();
-    expect(stored.count).toBe(DEFAULT_SETTINGS.count);
-    expect(stored.toolbarX).toBe(42);
-    expect(stored.toolbarY).toBe(84);
   });
 });
 
