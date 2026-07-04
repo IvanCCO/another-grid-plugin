@@ -48,7 +48,7 @@
   display: inline-flex;
   align-items: stretch;
   gap: 2px;
-  padding: 0 5px;
+  padding: 2px 5px;
   border: 1px solid var(--grid-ui-border);
   border-radius: 999px;
   background: #fff;
