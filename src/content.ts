@@ -86,7 +86,7 @@ const DISTRIBUTION_ICONS: Record<
     right: undefined,
   },
   grid: {
-    stretch: { icon: 'dimension.svg' },
+    stretch: { icon: 'grid-dimensions.svg' },
     center: { icon: 'align-center-vertical.svg' },
     left: undefined,
     right: undefined,
