@@ -17,6 +17,8 @@ describe('normalizeSettings', () => {
     expect(
       normalizeSettings({
         visible: false,
+        toolbarX: '128',
+        toolbarY: 44,
         axis: 'rows',
         distribution: 'bottom',
         count: '5',
@@ -24,6 +26,8 @@ describe('normalizeSettings', () => {
       }),
     ).toMatchObject({
       visible: false,
+      toolbarX: 128,
+      toolbarY: 44,
       axis: 'rows',
       distribution: 'bottom',
       count: 5,

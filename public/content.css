@@ -49,6 +49,18 @@
   box-shadow: var(--grid-ui-shadow);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.grid-ui--dragging .grid-ui__controller {
+  cursor: grabbing;
+}
+
+.grid-ui--dragging .grid-ui__button,
+.grid-ui--dragging .grid-ui__close {
+  cursor: grabbing;
 }
 
 .grid-ui__button,

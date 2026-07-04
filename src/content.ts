@@ -40,6 +40,15 @@ type OverlayUi = {
   distributionSelect: HTMLSelectElement;
 };
 
+type DragState = {
+  pointerId: number;
+  originX: number;
+  originY: number;
+  startX: number;
+  startY: number;
+  moved: boolean;
+};
+
 const AXIS_OPTIONS: Array<{
   value: GridAxis;
   label: string;
@@ -58,15 +67,22 @@ let activePopover: 'adjust' | null = null;
 let isDocumentEventsBound = false;
 const PERSIST_DELAY_MS = 250;
 let persistTimer = 0;
+let dragState: DragState | null = null;
+let suppressClickUntil = 0;
+
+const CONTROLLER_VIEWPORT_PADDING = 18;
+const DRAG_THRESHOLD_PX = 6;
 
 function getAssetUrl(filename: string): string {
   return chrome.runtime.getURL(`assets/${filename}`);
 }
 
 function removeOverlay(): void {
+  window.clearTimeout(persistTimer);
   overlayUi?.root.remove();
   overlayUi = null;
   activePopover = null;
+  dragState = null;
 }
 
 function createIcon(filename: string, className: string, rotation = 0): HTMLSpanElement {
@@ -240,6 +256,48 @@ function createDivider(): HTMLDivElement {
   return divider;
 }
 
+function clampControllerPosition(
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+): { x: number; y: number } {
+  return {
+    x: Math.min(
+      Math.max(x, CONTROLLER_VIEWPORT_PADDING),
+      window.innerWidth - width - CONTROLLER_VIEWPORT_PADDING,
+    ),
+    y: Math.min(
+      Math.max(y, CONTROLLER_VIEWPORT_PADDING),
+      window.innerHeight - height - CONTROLLER_VIEWPORT_PADDING,
+    ),
+  };
+}
+
+function applyControllerPosition(ui: OverlayUi, x: number, y: number): void {
+  const width = ui.controller.offsetWidth;
+  const height = ui.controller.offsetHeight;
+  const next = clampControllerPosition(x, y, width, height);
+
+  ui.controller.style.left = `${next.x}px`;
+  ui.controller.style.top = `${next.y}px`;
+  ui.controller.style.right = 'auto';
+}
+
+function getControllerPosition(settings: GridSettings, ui: OverlayUi): { x: number; y: number } {
+  const width = ui.controller.offsetWidth;
+  const height = ui.controller.offsetHeight;
+  const defaultX = window.innerWidth - width - CONTROLLER_VIEWPORT_PADDING;
+  const defaultY = CONTROLLER_VIEWPORT_PADDING;
+
+  return clampControllerPosition(
+    settings.toolbarX ?? defaultX,
+    settings.toolbarY ?? defaultY,
+    width,
+    height,
+  );
+}
+
 function ensureOverlayUi(): OverlayUi {
   if (overlayUi?.root.isConnected) {
     return overlayUi;
@@ -349,11 +407,17 @@ function ensureOverlayUi(): OverlayUi {
   }
 
   axisTrigger.addEventListener('click', () => {
+    if (performance.now() < suppressClickUntil) {
+      return;
+    }
     setActivePopover(null);
     void patchSettings({ visible: !currentSettings.visible });
   });
 
   adjustTrigger.addEventListener('click', () => {
+    if (performance.now() < suppressClickUntil) {
+      return;
+    }
     togglePopover('adjust');
   });
 
@@ -372,11 +436,102 @@ function ensureOverlayUi(): OverlayUi {
   });
 
   closeTrigger.addEventListener('click', () => {
+    if (performance.now() < suppressClickUntil) {
+      return;
+    }
     void applySettings(
       { ...currentSettings, enabled: false },
       { immediatePersist: true },
     );
   });
+
+  controller.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0) {
+      return;
+    }
+
+    if (event.target !== controller) {
+      return;
+    }
+
+    const rect = controller.getBoundingClientRect();
+    dragState = {
+      pointerId: event.pointerId,
+      originX: rect.left,
+      originY: rect.top,
+      startX: event.clientX,
+      startY: event.clientY,
+      moved: false,
+    };
+
+    controller.setPointerCapture(event.pointerId);
+  });
+
+  controller.addEventListener('pointermove', (event) => {
+    if (!dragState || dragState.pointerId !== event.pointerId) {
+      return;
+    }
+
+    const deltaX = event.clientX - dragState.startX;
+    const deltaY = event.clientY - dragState.startY;
+
+    if (!dragState.moved) {
+      const distance = Math.hypot(deltaX, deltaY);
+      if (distance < DRAG_THRESHOLD_PX) {
+        return;
+      }
+
+      dragState.moved = true;
+      root.classList.add('grid-ui--dragging');
+      setActivePopover(null);
+    }
+
+    event.preventDefault();
+    applyControllerPosition(
+      overlayUi ?? ensureOverlayUi(),
+      dragState.originX + deltaX,
+      dragState.originY + deltaY,
+    );
+  });
+
+  const finishDrag = (event: PointerEvent): void => {
+    if (!dragState || dragState.pointerId !== event.pointerId) {
+      return;
+    }
+
+    const didMove = dragState.moved;
+    dragState = null;
+    root.classList.remove('grid-ui--dragging');
+
+    if (!didMove) {
+      return;
+    }
+
+    suppressClickUntil = performance.now() + 220;
+
+    const rect = controller.getBoundingClientRect();
+    void applySettings(
+      {
+        ...currentSettings,
+        toolbarX: rect.left,
+        toolbarY: rect.top,
+      },
+      { immediatePersist: true },
+    );
+  };
+
+  controller.addEventListener('pointerup', finishDrag);
+  controller.addEventListener('pointercancel', finishDrag);
+  controller.addEventListener(
+    'click',
+    (event) => {
+      if (performance.now() < suppressClickUntil) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+    },
+    true,
+  );
 
   bindSliderField(countField.input, countField.valueEl, (value) => {
     void patchSettings({ count: value });
@@ -704,6 +859,8 @@ function renderController(settings: GridSettings): void {
   );
   ui.axisTrigger.setAttribute('aria-label', settings.visible ? 'Hide overlay' : 'Show overlay');
   ui.axisTrigger.dataset.state = settings.visible ? 'visible' : 'hidden';
+  const controllerPosition = getControllerPosition(settings, ui);
+  applyControllerPosition(ui, controllerPosition.x, controllerPosition.y);
 
   ui.countRange.value = String(settings.count);
   ui.sizeRange.value = String(settings.size);

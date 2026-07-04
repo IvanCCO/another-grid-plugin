@@ -14,6 +14,8 @@ export type GridDistribution =
 export interface GridSettings {
   enabled: boolean;
   visible: boolean;
+  toolbarX: number | null;
+  toolbarY: number | null;
   axis: GridAxis;
   count: number;
   color: string;
@@ -36,6 +38,8 @@ const MAX_SPACING = 240;
 export const DEFAULT_SETTINGS: GridSettings = {
   enabled: true,
   visible: true,
+  toolbarX: null,
+  toolbarY: null,
   axis: 'columns',
   count: 6,
   color: '#FF3B30',
@@ -63,6 +67,15 @@ function parseNumber(value: unknown, fallback: number): number {
   }
 
   return fallback;
+}
+
+function normalizeNullableNumber(value: unknown): number | null {
+  if (value == null || value === '') {
+    return null;
+  }
+
+  const parsed = parseNumber(value, Number.NaN);
+  return Number.isFinite(parsed) ? parsed : null;
 }
 
 function normalizeColor(value: unknown): string {
@@ -160,6 +173,8 @@ export function normalizeSettings(value: unknown): GridSettings {
       typeof source.visible === 'boolean'
         ? source.visible
         : DEFAULT_SETTINGS.visible,
+    toolbarX: normalizeNullableNumber(source.toolbarX),
+    toolbarY: normalizeNullableNumber(source.toolbarY),
     axis,
     count: clamp(
       Math.round(parseNumber(source.count, DEFAULT_SETTINGS.count)),
