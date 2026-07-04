@@ -44,4 +44,4 @@ jobs:
           retention-days: 7
           path: |
             dist/
-            artifacts/bookmarks-focus.zip
+            artifacts/grid-systems-overlay.zip
