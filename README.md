@@ -52,7 +52,7 @@ npm run build
 
 ### From a release
 
-Download `grid-systems-overlay.zip` from the [latest GitHub release](https://github.com/IvanCCO/another-grid-plugin/releases), unzip it, and load the folder as an unpacked extension.
+Download `another-grid-plugin.zip` from the [latest GitHub release](https://github.com/IvanCCO/another-grid-plugin/releases), unzip it, and load the folder as an unpacked extension.
 
 After code changes, run `npm run build` again, then reload the extension and refresh the page.
 
