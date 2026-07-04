@@ -209,21 +209,28 @@ function createColorField(): {
   opacityValue: HTMLSpanElement;
 } {
   const field = document.createElement('div');
-  field.className = 'grid-ui__field';
+  field.className = 'grid-ui__field grid-ui__field--slider grid-ui__field--slider--color';
 
-  const opacityValue = document.createElement('span');
-  opacityValue.className = 'grid-ui__section-value';
-  opacityValue.textContent = '12%';
+  const row = document.createElement('span');
+  row.className = 'grid-ui__slider-row grid-ui__slider-row--color';
 
-  const stack = document.createElement('span');
-  stack.className = 'grid-ui__color-stack';
+  const label = document.createElement('span');
+  label.className = 'grid-ui__field-label';
+  label.textContent = 'Color';
+
+  const valueGroup = document.createElement('span');
+  valueGroup.className = 'grid-ui__color-value';
+
+  const swatch = document.createElement('span');
+  swatch.className = 'grid-ui__color-swatch';
 
   const colorInput = document.createElement('input');
   colorInput.className = 'grid-ui__color';
   colorInput.type = 'color';
 
-  const sliderField = document.createElement('span');
-  sliderField.className = 'grid-ui__field grid-ui__field--slider grid-ui__field--slider--compact';
+  const opacityValue = document.createElement('span');
+  opacityValue.className = 'grid-ui__field-value';
+  opacityValue.textContent = '12%';
 
   const ruler = document.createElement('span');
   ruler.className = 'grid-ui__slider-ruler';
@@ -240,10 +247,10 @@ function createColorField(): {
   opacityInput.max = '100';
   opacityInput.step = '1';
 
-  sliderField.append(ruler, handle, opacityInput);
-
-  stack.append(colorInput, sliderField);
-  field.append(stack);
+  swatch.appendChild(colorInput);
+  valueGroup.append(swatch, opacityValue);
+  row.append(label, ruler, valueGroup);
+  field.append(row, handle, opacityInput);
 
   updateSliderVisual(opacityInput);
 
@@ -439,7 +446,6 @@ function ensureOverlayUi(): OverlayUi {
     sizeField.field,
     marginField.field,
     gutterField.field,
-    createSection('Color', colorField.opacityValue),
     colorField.field,
     generalActions,
   );
