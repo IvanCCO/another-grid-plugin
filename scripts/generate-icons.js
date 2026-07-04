@@ -14,9 +14,9 @@ const zlib = require('zlib');
 const fs = require('fs');
 const path = require('path');
 
-// Orange grid colour (#F97316 — vivid orange) with white grid lines.
+// Orange grid tile (#F97316 — vivid orange) with black grid lines.
 const ORANGE = [0xf9, 0x71, 0x16];
-const LINE = [0xff, 0xff, 0xff];
+const LINE = [0x00, 0x00, 0x00];
 
 /** CRC32 implementation (as specified in the PNG standard). */
 function crc32(buf) {
