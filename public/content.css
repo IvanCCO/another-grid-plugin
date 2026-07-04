@@ -97,7 +97,7 @@
 }
 
 .grid-ui__button {
-  background: var(--grid-ui-surface);
+  background: #fff;
 }
 
 .grid-ui__button:hover,
@@ -113,11 +113,11 @@
 }
 
 .grid-ui__button--primary {
-  background: rgba(0, 0, 0, 0.05);
+  background: #fff;
 }
 
 .grid-ui__button--primary[data-state='hidden'] {
-  background: rgba(0, 0, 0, 0.03);
+  background: #fff;
   color: rgba(31, 31, 32, 0.45);
 }
 
@@ -255,7 +255,7 @@
   min-height: 32px;
   border: 1px solid var(--grid-ui-border);
   border-radius: 10px;
-  background: var(--grid-ui-surface);
+  background: #fff;
   color: var(--grid-ui-text);
   cursor: pointer;
   transition:
@@ -301,7 +301,7 @@
   min-height: 32px;
   border: 1px solid var(--grid-ui-border);
   border-radius: 10px;
-  background: var(--grid-ui-surface);
+  background: #fff;
   color: var(--grid-ui-text);
   cursor: pointer;
   transition:
