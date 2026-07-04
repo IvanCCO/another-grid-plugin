@@ -13,8 +13,8 @@ Load `dist/` as an unpacked extension in `chrome://extensions`.
 
 ## Commit format
 
-This project uses [Conventional Commits](https://www.conventionalcommits.org/).
-Commit messages are enforced by commitlint on every commit.
+This project uses [Conventional Commits](https://www.conventionalcommits.org/)
+to drive automated versioning with semantic-release.
 
 | Prefix | Effect on version |
 |--------|-------------------|
