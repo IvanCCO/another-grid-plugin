@@ -95,20 +95,28 @@ function createSliderField(
   value: number,
 ): { field: HTMLLabelElement; input: HTMLInputElement; valueEl: HTMLSpanElement } {
   const field = document.createElement('label');
-  field.className = 'grid-ui__field';
+  field.className = 'grid-ui__field grid-ui__field--slider';
 
   const row = document.createElement('span');
-  row.className = 'grid-ui__field-row';
+  row.className = 'grid-ui__slider-row';
 
   const title = document.createElement('span');
   title.className = 'grid-ui__field-label';
   title.textContent = label;
 
+  const ruler = document.createElement('span');
+  ruler.className = 'grid-ui__slider-ruler';
+  ruler.setAttribute('aria-hidden', 'true');
+
   const valueEl = document.createElement('span');
   valueEl.className = 'grid-ui__field-value';
   valueEl.textContent = String(value);
 
-  row.append(title, valueEl);
+  row.append(title, ruler, valueEl);
+
+  const handle = document.createElement('span');
+  handle.className = 'grid-ui__slider-handle';
+  handle.setAttribute('aria-hidden', 'true');
 
   const input = document.createElement('input');
   input.className = 'grid-ui__range';
@@ -118,7 +126,8 @@ function createSliderField(
   input.step = '1';
   input.value = String(value);
 
-  field.append(row, input);
+  field.append(row, handle, input);
+  updateSliderVisual(input);
   return { field, input, valueEl };
 }
 
@@ -329,9 +338,14 @@ function ensureOverlayUi(): OverlayUi {
   bindSliderField(countField.input, countField.valueEl, (value) => {
     void patchSettings({ count: value });
   });
-  bindSliderField(sizeField.input, sizeField.valueEl, (value) => {
-    void patchSettings({ size: value });
-  });
+  bindSliderField(
+    sizeField.input,
+    sizeField.valueEl,
+    (value) => {
+      void patchSettings({ size: value });
+    },
+    (value) => `${value} ${getSizeLabel(currentSettings.axis).toLowerCase()}`,
+  );
   bindSliderField(marginField.input, marginField.valueEl, (value) => {
     void patchSettings({ margin: value });
   });
@@ -349,10 +363,14 @@ function ensureOverlayUi(): OverlayUi {
     void patchSettings({ color: colorField.colorInput.value });
   });
 
-  bindSliderField(colorField.opacityInput, colorField.opacityValue, (value) => {
-    colorField.opacityValue.textContent = `${value}%`;
-    void patchSettings({ opacity: value });
-  }, true);
+  bindSliderField(
+    colorField.opacityInput,
+    colorField.opacityValue,
+    (value) => {
+      void patchSettings({ opacity: value });
+    },
+    (value) => `${value}%`,
+  );
 
   overlayUi = {
     root,
@@ -398,15 +416,31 @@ function createPopoverHeader(title: string, subtitle: string): HTMLDivElement {
   return header;
 }
 
+function updateSliderVisual(input: HTMLInputElement): void {
+  const min = Number(input.min || 0);
+  const max = Number(input.max || 100);
+  const value = Number(input.value || min);
+  const percent = max === min ? 0 : ((value - min) / (max - min)) * 100;
+  const field = input.closest('.grid-ui__field--slider') as HTMLElement | null;
+
+  if (!field) {
+    return;
+  }
+
+  field.style.setProperty('--slider-percent', `${percent}`);
+  field.style.setProperty('--slider-scale', `${percent / 100}`);
+}
+
 function bindSliderField(
   input: HTMLInputElement,
   output: HTMLElement,
   onChange: (value: number) => void,
-  suffixOnly = false,
+  formatValue: (value: number) => string = (value) => String(value),
 ): void {
   input.addEventListener('input', () => {
     const value = Number(input.value);
-    output.textContent = suffixOnly ? `${value}%` : String(value);
+    output.textContent = formatValue(value);
+    updateSliderVisual(input);
     void onChange(value);
   });
 }
@@ -661,6 +695,11 @@ function renderController(settings: GridSettings): void {
   ui.gutterRange.value = String(settings.gutter);
   ui.colorInput.value = settings.color;
   ui.opacityRange.value = String(settings.opacity);
+  updateSliderVisual(ui.countRange);
+  updateSliderVisual(ui.sizeRange);
+  updateSliderVisual(ui.marginRange);
+  updateSliderVisual(ui.gutterRange);
+  updateSliderVisual(ui.opacityRange);
   ui.countValue.textContent = String(settings.count);
   ui.sizeLabel.textContent = getSizeLabel(settings.axis);
   ui.sizeValue.textContent = `${settings.size} ${getSizeLabel(settings.axis).toLowerCase()}`;
