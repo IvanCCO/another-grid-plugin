@@ -46,13 +46,12 @@
   top: 18px;
   right: 18px;
   display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  min-height: 40px;
-  padding: 4px;
+  align-items: stretch;
+  gap: 2px;
+  padding: 0 5px;
   border: 1px solid var(--grid-ui-border);
   border-radius: 999px;
-  background: var(--grid-ui-bg);
+  background: #fff;
   box-shadow: var(--grid-ui-shadow);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
@@ -88,8 +87,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 999px;
   cursor: pointer;
   transition:
