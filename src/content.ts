@@ -43,6 +43,24 @@ function createTrack(color: string): HTMLDivElement {
   return track;
 }
 
+function createFrame(settings: GridSettings): HTMLDivElement {
+  const frame = document.createElement('div');
+  frame.style.position = 'absolute';
+  frame.style.display = 'grid';
+  frame.style.gap = `${settings.gutter}px`;
+  return frame;
+}
+
+function appendTracks(
+  frame: HTMLDivElement,
+  count: number,
+  color: string,
+): void {
+  for (let index = 0; index < count; index += 1) {
+    frame.appendChild(createTrack(color));
+  }
+}
+
 function getOffset(settings: GridSettings, span: number, viewport: number): number {
   const safeSpan = Math.min(span, viewport);
 
@@ -61,13 +79,11 @@ function getOffset(settings: GridSettings, span: number, viewport: number): numb
 }
 
 function applyColumnsGrid(root: HTMLDivElement, settings: GridSettings): void {
-  const frame = document.createElement('div');
+  const frame = createFrame(settings);
   const fill = toRgba(settings.color, settings.opacity);
 
-  frame.style.position = 'absolute';
   frame.style.top = '0';
   frame.style.bottom = '0';
-  frame.style.display = 'grid';
   frame.style.gap = `${settings.gutter}px`;
 
   if (settings.distribution === 'stretch') {
@@ -84,21 +100,17 @@ function applyColumnsGrid(root: HTMLDivElement, settings: GridSettings): void {
     frame.style.gridTemplateColumns = `repeat(${settings.count}, ${settings.size}px)`;
   }
 
-  for (let index = 0; index < settings.count; index += 1) {
-    frame.appendChild(createTrack(fill));
-  }
+  appendTracks(frame, settings.count, fill);
 
   root.appendChild(frame);
 }
 
 function applyRowsGrid(root: HTMLDivElement, settings: GridSettings): void {
-  const frame = document.createElement('div');
+  const frame = createFrame(settings);
   const fill = toRgba(settings.color, settings.opacity);
 
-  frame.style.position = 'absolute';
   frame.style.left = '0';
   frame.style.right = '0';
-  frame.style.display = 'grid';
   frame.style.gap = `${settings.gutter}px`;
 
   if (settings.distribution === 'stretch') {
@@ -115,9 +127,33 @@ function applyRowsGrid(root: HTMLDivElement, settings: GridSettings): void {
     frame.style.gridTemplateRows = `repeat(${settings.count}, ${settings.size}px)`;
   }
 
-  for (let index = 0; index < settings.count; index += 1) {
-    frame.appendChild(createTrack(fill));
+  appendTracks(frame, settings.count, fill);
+
+  root.appendChild(frame);
+}
+
+function applySquareGrid(root: HTMLDivElement, settings: GridSettings): void {
+  const frame = createFrame(settings);
+  const fill = toRgba(settings.color, settings.opacity);
+
+  if (settings.distribution === 'stretch') {
+    frame.style.inset = `${settings.margin}px`;
+    frame.style.gridTemplateColumns = `repeat(${settings.count}, minmax(0, 1fr))`;
+    frame.style.gridTemplateRows = `repeat(${settings.count}, minmax(0, 1fr))`;
+  } else {
+    const span = getFixedTrackSpan(settings);
+    const availableWidth = Math.max(window.innerWidth - settings.margin * 2, 0);
+    const availableHeight = Math.max(window.innerHeight - settings.margin * 2, 0);
+
+    frame.style.left = `${Math.max((window.innerWidth - span) / 2, settings.margin)}px`;
+    frame.style.top = `${Math.max((window.innerHeight - span) / 2, settings.margin)}px`;
+    frame.style.width = `${Math.min(span, availableWidth)}px`;
+    frame.style.height = `${Math.min(span, availableHeight)}px`;
+    frame.style.gridTemplateColumns = `repeat(${settings.count}, ${settings.size}px)`;
+    frame.style.gridTemplateRows = `repeat(${settings.count}, ${settings.size}px)`;
   }
+
+  appendTracks(frame, settings.count * settings.count, fill);
 
   root.appendChild(frame);
 }
@@ -132,7 +168,9 @@ function renderOverlay(settings: GridSettings): void {
   const root = ensureOverlayRoot();
   root.replaceChildren();
 
-  if (settings.axis === 'rows') {
+  if (settings.axis === 'grid') {
+    applySquareGrid(root, settings);
+  } else if (settings.axis === 'rows') {
     applyRowsGrid(root, settings);
   } else {
     applyColumnsGrid(root, settings);

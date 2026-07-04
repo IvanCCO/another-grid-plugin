@@ -28,11 +28,29 @@ function copyFile(src, dest) {
   fs.copyFileSync(src, dest);
 }
 
+/** Copy a directory recursively into dist/. */
+function copyDir(src, dest) {
+  fs.mkdirSync(dest, { recursive: true });
+
+  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
+
+    if (entry.isDirectory()) {
+      copyDir(srcPath, destPath);
+      continue;
+    }
+
+    copyFile(srcPath, destPath);
+  }
+}
+
 /** Copy static assets (manifest, CSS, HTML, icons) into dist/. */
 function copyAssets() {
   copyFile(path.join(ROOT, 'manifest.json'),          path.join(DIST, 'manifest.json'));
   copyFile(path.join(ROOT, 'public', 'content.css'),  path.join(DIST, 'content.css'));
   copyFile(path.join(ROOT, 'public', 'popup.html'),   path.join(DIST, 'popup.html'));
+  copyDir(path.join(ROOT, 'public', 'assets'),        path.join(DIST, 'assets'));
 
   const iconsDir = path.join(ROOT, 'icons');
   if (fs.existsSync(iconsDir)) {
@@ -56,6 +74,7 @@ const sharedOptions = {
 };
 
 async function build() {
+  fs.rmSync(DIST, { recursive: true, force: true });
   fs.mkdirSync(DIST, { recursive: true });
   copyAssets();
 

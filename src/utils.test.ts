@@ -40,12 +40,25 @@ describe('normalizeSettings', () => {
       distribution: 'stretch',
     });
   });
+
+  it('supports the square grid mode', () => {
+    expect(
+      normalizeSettings({
+        axis: 'grid',
+        distribution: 'center',
+      }),
+    ).toMatchObject({
+      axis: 'grid',
+      distribution: 'center',
+    });
+  });
 });
 
 describe('grid metadata', () => {
   it('returns the correct label and options for each axis', () => {
     expect(getSizeLabel('columns')).toBe('Width');
     expect(getSizeLabel('rows')).toBe('Height');
+    expect(getSizeLabel('grid')).toBe('Cell');
     expect(getDistributionOptions('columns').map(({ value }) => value)).toEqual([
       'stretch',
       'center',
@@ -57,6 +70,10 @@ describe('grid metadata', () => {
       'center',
       'top',
       'bottom',
+    ]);
+    expect(getDistributionOptions('grid').map(({ value }) => value)).toEqual([
+      'stretch',
+      'center',
     ]);
   });
 

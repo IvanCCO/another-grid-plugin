@@ -1,5 +1,6 @@
 import {
   DEFAULT_SETTINGS,
+  getAxisLabel,
   GRID_MESSAGE_TYPE,
   STORAGE_KEY,
   type GridAxis,
@@ -11,6 +12,7 @@ import {
 
 const enabledInput = document.getElementById('enabled') as HTMLInputElement;
 const axisInput = document.getElementById('axis') as HTMLSelectElement;
+const axisPicker = document.getElementById('axis-picker') as HTMLDivElement;
 const countInput = document.getElementById('count') as HTMLInputElement;
 const countValue = document.getElementById('count-value') as HTMLOutputElement;
 const colorInput = document.getElementById('color') as HTMLInputElement;
@@ -29,17 +31,62 @@ const sizeLabel = document.querySelector(
 const sizeHint = document.querySelector('[data-size-hint]') as HTMLSpanElement;
 const statusEl = document.getElementById('status') as HTMLParagraphElement;
 
+const AXIS_OPTIONS: Array<{
+  value: GridAxis;
+  label: string;
+  icon: string;
+  rotation?: string;
+}> = [
+  { value: 'columns', label: 'Vertical', icon: 'assets/measure.svg', rotation: '90deg' },
+  { value: 'rows', label: 'Horizontal', icon: 'assets/measure.svg', rotation: '180deg' },
+  { value: 'grid', label: 'Grid', icon: 'assets/grid.svg' },
+];
+
 function setStatus(settings: GridSettings): void {
   if (!settings.enabled) {
     statusEl.textContent = 'Overlay paused on the current page.';
     return;
   }
 
-  const sizeWord = settings.axis === 'rows' ? 'height' : 'width';
+  const sizeWord =
+    settings.axis === 'rows'
+      ? 'height'
+      : settings.axis === 'grid'
+        ? 'cell'
+        : 'width';
   const autoOrValue =
-    settings.distribution === 'stretch' ? 'auto' : `${settings.size}px ${sizeWord}`;
+    settings.distribution === 'stretch'
+      ? 'auto'
+      : `${settings.size}px ${sizeWord}`;
 
-  statusEl.textContent = `${settings.axis} · ${settings.count} tracks · ${settings.distribution} · ${autoOrValue}`;
+  statusEl.textContent = `${getAxisLabel(settings.axis)} · ${settings.count} tracks · ${settings.distribution} · ${autoOrValue}`;
+}
+
+function renderAxisOptions(selected: GridAxis): void {
+  axisPicker.replaceChildren(
+    ...AXIS_OPTIONS.map(({ value, label, icon, rotation }) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'axis-option';
+      button.dataset.axis = value;
+      button.setAttribute('role', 'radio');
+      button.setAttribute('aria-checked', String(value === selected));
+      button.setAttribute('aria-label', label);
+      button.dataset.selected = String(value === selected);
+
+      const iconEl = document.createElement('span');
+      iconEl.className = 'axis-option-icon';
+      iconEl.style.setProperty('--icon-url', `url("${icon}")`);
+      iconEl.style.setProperty('--icon-rotation', rotation ?? '0deg');
+
+      const textEl = document.createElement('span');
+      textEl.className = 'axis-option-label';
+      textEl.textContent = label;
+
+      button.append(iconEl, textEl);
+      return button;
+    }),
+  );
 }
 
 function renderDistributionOptions(axis: GridAxis, selected: string): void {
@@ -69,6 +116,7 @@ function renderSlider(input: HTMLInputElement, output: HTMLOutputElement): void 
 function render(settings: GridSettings): void {
   enabledInput.checked = settings.enabled;
   axisInput.value = settings.axis;
+  renderAxisOptions(settings.axis);
   countInput.value = String(settings.count);
   colorInput.value = settings.color;
   opacityInput.value = String(settings.opacity);
@@ -152,6 +200,22 @@ function bindForm(): void {
   });
 
   axisInput.addEventListener('change', () => {
+    void persistAxisChange();
+  });
+
+  axisPicker.addEventListener('click', (event) => {
+    const target = event.target as HTMLElement | null;
+    const button = target?.closest<HTMLButtonElement>('[data-axis]');
+    if (!button) {
+      return;
+    }
+
+    const axis = button.dataset.axis as GridAxis;
+    if (axisInput.value === axis) {
+      return;
+    }
+
+    axisInput.value = axis;
     void persistAxisChange();
   });
 }

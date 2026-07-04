@@ -2,7 +2,7 @@ export const STORAGE_KEY = 'gridSettings';
 export const GRID_OVERLAY_ID = 'grid-systems-overlay';
 export const GRID_MESSAGE_TYPE = 'GRID_SETTINGS_UPDATED';
 
-export type GridAxis = 'columns' | 'rows';
+export type GridAxis = 'columns' | 'rows' | 'grid';
 export type GridDistribution =
   | 'stretch'
   | 'center'
@@ -73,7 +73,11 @@ function normalizeColor(value: unknown): string {
 }
 
 function normalizeAxis(value: unknown): GridAxis {
-  return value === 'rows' ? 'rows' : 'columns';
+  if (value === 'rows' || value === 'grid') {
+    return value;
+  }
+
+  return 'columns';
 }
 
 function normalizeDistribution(
@@ -89,6 +93,13 @@ function normalizeDistribution(
 export function getDistributionOptions(
   axis: GridAxis,
 ): Array<{ value: GridDistribution; label: string }> {
+  if (axis === 'grid') {
+    return [
+      { value: 'stretch', label: 'Stretch' },
+      { value: 'center', label: 'Center' },
+    ];
+  }
+
   if (axis === 'rows') {
     return [
       { value: 'stretch', label: 'Stretch' },
@@ -107,7 +118,27 @@ export function getDistributionOptions(
 }
 
 export function getSizeLabel(axis: GridAxis): string {
-  return axis === 'rows' ? 'Height' : 'Width';
+  if (axis === 'rows') {
+    return 'Height';
+  }
+
+  if (axis === 'grid') {
+    return 'Cell';
+  }
+
+  return 'Width';
+}
+
+export function getAxisLabel(axis: GridAxis): string {
+  if (axis === 'rows') {
+    return 'horizontal';
+  }
+
+  if (axis === 'grid') {
+    return 'grid';
+  }
+
+  return 'vertical';
 }
 
 export function normalizeSettings(value: unknown): GridSettings {

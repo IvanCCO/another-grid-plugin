@@ -149,6 +149,63 @@
       min-width: 0;
     }
 
+    .axis-picker {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .axis-option {
+      display: grid;
+      justify-items: center;
+      gap: 8px;
+      padding: 11px 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--panel);
+      color: #ddd4c7;
+      cursor: pointer;
+      transition:
+        border-color 160ms ease,
+        background 160ms ease,
+        color 160ms ease,
+        transform 160ms ease;
+    }
+
+    .axis-option:hover {
+      border-color: rgba(241, 90, 41, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .axis-option[data-selected='true'] {
+      background: var(--accent-soft);
+      border-color: rgba(241, 90, 41, 0.55);
+      color: var(--text);
+    }
+
+    .axis-option-icon {
+      width: 20px;
+      height: 20px;
+      background: currentColor;
+      mask-image: var(--icon-url);
+      mask-repeat: no-repeat;
+      mask-position: center;
+      mask-size: contain;
+      -webkit-mask-image: var(--icon-url);
+      -webkit-mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+      -webkit-mask-size: contain;
+      transform: rotate(var(--icon-rotation, 0deg));
+    }
+
+    .axis-option-label {
+      font-size: 11px;
+      line-height: 1;
+      font-family: 'SF Mono', 'Monaco', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
     select,
     input[type='number'],
     input[type='text'] {
@@ -360,9 +417,11 @@
       <div class="field">
         <label for="axis">Grid</label>
         <div class="control">
-          <select id="axis">
+          <div id="axis-picker" class="axis-picker" role="radiogroup" aria-label="Grid mode"></div>
+          <select id="axis" class="sr-only">
             <option value="columns">Columns</option>
             <option value="rows">Rows</option>
+            <option value="grid">Grid</option>
           </select>
         </div>
       </div>
