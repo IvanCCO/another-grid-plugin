@@ -402,7 +402,7 @@ function ensureOverlayUi(): OverlayUi {
   layoutSection.className = 'grid-ui__layout-section';
   layoutSection.append(
     createLayoutColumn('Layout', adjustAxisGroup),
-    createLayoutColumn('Tipo', distributionGroup),
+    createLayoutColumn('TYPE', distributionGroup),
   );
   
   const countField = createSliderField('Count', 1, 24, DEFAULT_SETTINGS.count);
@@ -594,7 +594,7 @@ function ensureOverlayUi(): OverlayUi {
     (value) => {
       void patchSettings({ size: value });
     },
-    (value) => `${value} ${getSizeLabel(currentSettings.axis).toLowerCase()}`,
+    (value) => String(value),
   );
   bindSliderField(marginField.input, marginField.valueEl, (value) => {
     void patchSettings({ margin: value });
@@ -950,7 +950,7 @@ function renderController(settings: GridSettings): void {
   updateSliderVisual(ui.opacityRange);
   ui.countValue.textContent = String(settings.count);
   ui.sizeLabel.textContent = getSizeLabel(settings.axis);
-  ui.sizeValue.textContent = `${settings.size} ${getSizeLabel(settings.axis).toLowerCase()}`;
+  ui.sizeValue.textContent = String(settings.size);
   ui.marginValue.textContent = String(settings.margin);
   ui.gutterValue.textContent = String(settings.gutter);
   ui.opacityValue.textContent = `${settings.opacity}%`;

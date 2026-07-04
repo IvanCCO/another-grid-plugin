@@ -3,6 +3,8 @@
 ## Project Context
 This project is a browser extension for overlaying configurable grid systems on any webpage.
 
+**Project language:** English. Use English for UI copy, labels, comments, commit messages, documentation, and agent responses unless the user explicitly asks for another language.
+
 The conceptual reference for the product is **_Grid Systems in Graphic Design_ by Josef Muller-Brockmann**. Decisions about spacing, proportion, rhythm, alignment, and visual restraint should stay grounded in that tradition:
 
 - clarity over decoration
