@@ -373,8 +373,8 @@
 }
 
 .grid-ui__field--slider {
-  --grid-ui-slider-fill: var(--grid-ui-orange);
-  --grid-ui-slider-sheen: var(--grid-ui-orange);
+  --grid-ui-slider-fill: var(--grid-ui-orange-soft);
+  --grid-ui-slider-sheen: var(--grid-ui-orange-sheen);
   --slider-percent: 0;
   position: relative;
   min-height: 46px;
@@ -486,7 +486,7 @@
   width: 5px;
   height: 26px;
   border-radius: 999px;
-  background: var(--grid-ui-accent);
+  background: var(--grid-ui-muted);
   opacity: 0;
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.08),
@@ -512,7 +512,7 @@
 .grid-ui__field-label {
   color: var(--grid-ui-text);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: -0.01em;
   text-transform: none;
 }
@@ -520,7 +520,7 @@
 .grid-ui__field-value {
   color: var(--grid-ui-text);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }
@@ -559,7 +559,7 @@
 
 .grid-ui__field--slider:focus-within .grid-ui__slider-handle {
   height: 30px;
-  background: var(--grid-ui-accent);
+  background: var(--grid-ui-muted);
   opacity: 1;
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.1),
@@ -575,7 +575,7 @@
 @media (hover: hover) and (pointer: fine) {
   .grid-ui__field--slider:hover .grid-ui__slider-handle {
     height: 30px;
-    background: var(--grid-ui-accent);
+    background: var(--grid-ui-muted);
     opacity: 1;
     box-shadow:
       0 0 0 1px rgba(255, 255, 255, 0.1),

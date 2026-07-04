@@ -16,6 +16,8 @@ Always use [DESIGN.md](./DESIGN.md) as the primary design reference before chang
 
 If a new UI change conflicts with the current implementation, prefer aligning the code with `DESIGN.md` unless the user explicitly asks to evolve the design system. If the design evolves materially, update `DESIGN.md` as part of the same work.
 
+Colors that are no longer used in the implementation must be removed from `DESIGN.md`. The document should describe the active palette only, not historical or abandoned tokens.
+
 ## UI And Motion Rules
 For animation, interaction polish, hover behavior, micro-interactions, and visual refinement, always use the `emil-design-eng` skill as the default reference.
 

@@ -22,7 +22,7 @@ The overall aesthetic is minimalist and utilitarian with polished micro-interact
 - **Primary Soft Black** (`rgba(28, 28, 30, 0.88)`)  
   Used for main text, slider handles, icons, and dark emphasis states.
 - **Muted System Gray** (`rgba(60, 60, 67, 0.55)`)  
-  Used for section headings, hints, and lower-emphasis labels.
+  Used for section headings, hints, lower-emphasis labels, and the slider handle.
 - **Surface Mist** (`rgba(0, 0, 0, 0.04)`)  
   Used for passive button and control backgrounds.
 - **Surface Mist Hover** (`rgba(0, 0, 0, 0.06)`)  
@@ -30,7 +30,7 @@ The overall aesthetic is minimalist and utilitarian with polished micro-interact
 - **Signal Orange** (`#FF8A3D`)  
   Used as the core accent for active slider fill and visual emphasis.
 - **Signal Orange Wash** (`rgba(255, 138, 61, 0.18)`)  
-  Used for selected pills, active chips, and slider fill overlays.
+  Used for selected pills, active chips, and the slider’s filled region.
 - **Signal Orange Sheen** (`rgba(255, 138, 61, 0.10)`)  
   Used to soften the active slider gradient and keep the accent airy.
 
@@ -62,7 +62,7 @@ The overall aesthetic is minimalist and utilitarian with polished micro-interact
 - **Buttons:** Mostly pill-shaped or softly rounded rectangles. Passive states use misty neutral fills; active or selected states pick up accent washes. Press feedback uses subtle scale-down interaction.
 - **Cards/Containers:** Generously rounded corners, translucent white surfaces, and whisper-soft diffused shadows. The overlay prefers a glass-panel feeling over opaque blocks.
 - **Inputs/Forms:** Borders are light and quiet. Selects and swatches use softly rounded rectangles (`12px`) with white or near-white fills.
-- **Sliders:** Rounded rectangular shells with full white backgrounds and a clipped accent fill. Internal rulers and the vertical handle appear only on hover/focus to keep the default state calm.
+- **Sliders:** Rounded rectangular shells with full white backgrounds, a softened orange filled region, heavier medium-plus labeling, and a muted gray vertical handle. Internal rulers and the handle appear only on hover/focus to keep the default state calm.
 - **Icon toggles:** Circular or pill-like controls with dark iconography by default and accent color only when state changes matter.
 
 ## 5. Layout Principles
