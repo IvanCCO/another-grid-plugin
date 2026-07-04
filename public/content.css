@@ -378,8 +378,8 @@
 }
 
 .grid-ui__field--slider {
-  --grid-ui-slider-fill: var(--grid-ui-orange-soft);
-  --grid-ui-slider-sheen: var(--grid-ui-orange-sheen);
+  --grid-ui-slider-fill: var(--grid-ui-orange);
+  --grid-ui-slider-sheen: var(--grid-ui-orange);
   --slider-percent: 0;
   position: relative;
   min-height: 46px;
@@ -517,6 +517,7 @@
 .grid-ui__field-label {
   color: var(--grid-ui-text);
   font-size: 13px;
+  font-weight: 500;
   letter-spacing: -0.01em;
   text-transform: none;
 }
@@ -524,6 +525,7 @@
 .grid-ui__field-value {
   color: var(--grid-ui-text);
   font-size: 12px;
+  font-weight: 500;
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }
