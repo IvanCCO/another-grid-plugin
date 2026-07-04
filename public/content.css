@@ -494,12 +494,16 @@
 .grid-ui__pattern-option-list {
   display: grid;
   gap: 2px;
+  margin-inline: -4px;
 }
 
 .grid-ui__pattern-option {
+  position: relative;
+  z-index: 0;
   width: 100%;
   min-height: 32px;
-  padding: 0 0 0 10px;
+  padding: 0 8px 0 4px;
+  border: 0;
   border-radius: 10px;
   background: transparent;
   color: var(--grid-ui-muted);
@@ -509,37 +513,74 @@
   text-align: left;
   cursor: pointer;
   transition:
-    transform 140ms var(--grid-ui-ease-out),
-    background 160ms ease,
     color 160ms ease;
 }
 
-.grid-ui__pattern-option[data-active='true'] {
-  background: rgba(236, 103, 37, 0.12);
+.grid-ui__pattern-option-list > .grid-ui__pattern-option::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 0 -4px;
+  border-radius: 10px;
+  background: transparent;
+  z-index: -1;
+  pointer-events: none;
+  transition: background 160ms ease;
+}
+
+.grid-ui__pattern-option-list > .grid-ui__pattern-option:hover {
   color: var(--grid-ui-text);
 }
 
+.grid-ui__pattern-option-list > .grid-ui__pattern-option:hover::before {
+  background: var(--grid-ui-surface);
+}
+
+.grid-ui__pattern-option-list > .grid-ui__pattern-option[data-active='true'] {
+  color: var(--grid-ui-text);
+}
+
+.grid-ui__pattern-option-list > .grid-ui__pattern-option[data-active='true']::before {
+  background: var(--grid-ui-orange-soft);
+}
+
 .grid-ui__pattern-option-row {
+  position: relative;
+  z-index: 0;
   display: flex;
   align-items: center;
   gap: 2px;
   min-height: 32px;
   border-radius: 10px;
   padding-right: 2px;
-  overflow: hidden;
+  overflow: visible;
   transition:
     opacity 180ms var(--grid-ui-ease-out),
     transform 180ms var(--grid-ui-ease-out),
     max-height 200ms var(--grid-ui-ease-out),
     min-height 200ms var(--grid-ui-ease-out),
-    background 160ms ease,
     color 160ms ease;
 }
 
-.grid-ui__pattern-option-row[data-active='true'] {
-  background: rgba(236, 103, 37, 0.12);
+.grid-ui__pattern-option-row::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 0 -4px;
+  border-radius: 10px;
+  background: transparent;
+  z-index: -1;
+  pointer-events: none;
+  transition: background 160ms ease;
 }
 
+.grid-ui__pattern-option-row:hover::before {
+  background: var(--grid-ui-surface);
+}
+
+.grid-ui__pattern-option-row[data-active='true']::before {
+  background: var(--grid-ui-orange-soft);
+}
+
+.grid-ui__pattern-option-row:hover .grid-ui__pattern-option,
 .grid-ui__pattern-option-row[data-active='true'] .grid-ui__pattern-option {
   color: var(--grid-ui-text);
 }
@@ -553,17 +594,16 @@
 }
 
 .grid-ui__pattern-option-row .grid-ui__pattern-option {
+  position: relative;
+  z-index: 1;
   flex: 1;
   min-width: 0;
-  padding-right: 4px;
-}
-
-.grid-ui__pattern-option-row .grid-ui__pattern-option[data-active='true'] {
-  background: transparent;
+  padding: 0 4px 0 4px;
 }
 
 .grid-ui__pattern-delete {
   position: relative;
+  z-index: 1;
   display: grid;
   place-items: center;
   flex: 0 0 28px;
@@ -807,6 +847,14 @@
   --grid-ui-slider-fill: var(--grid-ui-orange-soft);
   --grid-ui-slider-sheen: var(--grid-ui-orange-sheen);
   --slider-percent: 0;
+  --slider-handle-edge-opacity: clamp(
+    0.28,
+    min(
+      calc((var(--slider-percent) - 15) / 5),
+      calc((85 - var(--slider-percent)) / 5)
+    ),
+    1
+  );
   position: relative;
   min-height: 46px;
   padding: 0;
@@ -973,7 +1021,7 @@
 .grid-ui__field--slider:focus-within .grid-ui__slider-handle {
   height: 30px;
   background: var(--grid-ui-handle-active);
-  opacity: 1;
+  opacity: var(--slider-handle-edge-opacity);
   box-shadow: none;
   transform: translate(-50%, -50%) scaleY(1);
 }
@@ -987,7 +1035,7 @@
   .grid-ui__field--slider:hover .grid-ui__slider-handle {
     height: 30px;
     background: var(--grid-ui-handle-active);
-    opacity: 1;
+    opacity: var(--slider-handle-edge-opacity);
     box-shadow: none;
     transform: translate(-50%, -50%) scaleY(1);
   }
@@ -1109,23 +1157,8 @@
   cursor: pointer;
 }
 
-.grid-ui__pattern-option:hover {
-  background: rgba(0, 0, 0, 0.04);
-  color: var(--grid-ui-text);
-}
-
-.grid-ui__pattern-option-row .grid-ui__pattern-option:hover {
-  background: transparent;
-  color: var(--grid-ui-muted);
-}
-
-.grid-ui__pattern-option-row[data-active='true'] .grid-ui__pattern-option:hover {
-  color: var(--grid-ui-text);
-}
-
 @media (hover: hover) and (pointer: fine) {
   .grid-ui__button:hover,
-  .grid-ui__pattern-option-list > .grid-ui__pattern-option:hover,
   .grid-ui__menu-item:hover {
     transform: translateY(-1px);
   }
