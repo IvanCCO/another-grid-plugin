@@ -14,6 +14,7 @@ import {
   deleteVariation,
   ensureAxisPattern,
   getActivePattern,
+  getPatternsByKind,
   getPatternsForAxis,
   getSiteState,
   getSiteStorageKey,
@@ -612,8 +613,8 @@ function renderController(settings: GridSettings): void {
   renderPatternPickerMenu(ui.patternVariationSection, ui.patternPresetSection, {
     siteName,
     activePatternId: activePattern.id,
-    variations: getPatternsForAxis(currentSiteState, settings.axis, 'variation'),
-    presets: getPatternsForAxis(currentSiteState, settings.axis, 'preset'),
+    variations: getPatternsByKind(currentSiteState, 'variation'),
+    presets: getPatternsByKind(currentSiteState, 'preset'),
     onSelect: (patternId) => {
       setPatternMenuOpen(false);
       void applySiteState(applyPatternSelection(currentSiteState, patternId), {
@@ -621,7 +622,7 @@ function renderController(settings: GridSettings): void {
       });
     },
     onDelete: (patternId) => {
-      const nextState = deleteVariation(currentSiteState, patternId, settings.axis);
+      const nextState = deleteVariation(currentSiteState, patternId);
       if (!nextState) {
         return;
       }

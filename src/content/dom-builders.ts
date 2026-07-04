@@ -413,6 +413,19 @@ function bindHoldToDelete(
   button.addEventListener('lostpointercapture', cancelHold);
 }
 
+function appendPatternMenuContent(button: HTMLButtonElement, pattern: GridPattern): void {
+  const axisOption = getAxisOption(pattern.axis);
+  const icon = createIcon(
+    axisOption.icon,
+    'grid-ui__pattern-option-icon',
+    axisOption.rotation ?? 0,
+  );
+  const label = document.createElement('span');
+  label.className = 'grid-ui__pattern-option-label';
+  label.textContent = pattern.name;
+  button.append(icon, label);
+}
+
 function createPatternMenuButton(
   pattern: GridPattern,
   activePatternId: string,
@@ -425,7 +438,7 @@ function createPatternMenuButton(
   button.dataset.kind = pattern.kind;
   button.setAttribute('role', 'menuitemradio');
   button.setAttribute('aria-checked', String(pattern.id === activePatternId));
-  button.textContent = pattern.name;
+  appendPatternMenuContent(button, pattern);
   button.addEventListener('click', () => {
     onSelect(pattern.id);
   });
@@ -450,7 +463,7 @@ function createVariationMenuRow(
   selectButton.className = 'grid-ui__pattern-option';
   selectButton.setAttribute('role', 'menuitemradio');
   selectButton.setAttribute('aria-checked', String(pattern.id === activePatternId));
-  selectButton.textContent = pattern.name;
+  appendPatternMenuContent(selectButton, pattern);
   selectButton.addEventListener('click', () => {
     onSelect(pattern.id);
   });

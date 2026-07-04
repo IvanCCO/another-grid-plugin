@@ -6,6 +6,7 @@ import {
   deleteVariation,
   ensureAxisPattern,
   getActivePattern,
+  getPatternsByKind,
   getPatternsForAxis,
   getSiteState,
   normalizeGridStorage,
@@ -87,7 +88,7 @@ describe('site patterns', () => {
     expect(axisVariations).toHaveLength(3);
 
     const deletedId = axisVariations[0]!.id;
-    const nextState = deleteVariation(siteState, deletedId, 'columns');
+    const nextState = deleteVariation(siteState, deletedId);
 
     expect(nextState).not.toBeNull();
     expect(getPatternsForAxis(nextState!, 'columns', 'variation')).toHaveLength(2);
@@ -100,6 +101,15 @@ describe('site patterns', () => {
     const siteState = getSiteState(storage, SITE_KEY);
     const onlyVariation = getPatternsForAxis(siteState, 'columns', 'variation')[0]!;
 
-    expect(deleteVariation(siteState, onlyVariation.id, 'columns')).toBeNull();
+    expect(deleteVariation(siteState, onlyVariation.id)).toBeNull();
+  });
+
+  it('sorts presets by layout order across all axes', () => {
+    const storage = normalizeGridStorage(DEFAULT_SETTINGS, SITE_KEY);
+    const siteState = getSiteState(storage, SITE_KEY);
+    const presets = getPatternsByKind(siteState, 'preset').map((pattern) => pattern.name);
+
+    expect(presets.indexOf('Web 12')).toBeLessThan(presets.indexOf('Rhythm 8'));
+    expect(presets.indexOf('Rhythm 8')).toBeLessThan(presets.indexOf('Modular 12'));
   });
 });

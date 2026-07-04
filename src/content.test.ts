@@ -164,7 +164,7 @@ describe('adjust popover', () => {
 });
 
 describe('pattern picker', () => {
-  it('filters variations and defaults by the active axis', async () => {
+  it('lists all variations and defaults regardless of the active axis', async () => {
     await loadContentScript();
     const overlay = getOverlay();
     const adjustTrigger = overlay.querySelector('.grid-ui__anchor--center') as HTMLButtonElement;
@@ -174,26 +174,30 @@ describe('pattern picker', () => {
     patternTrigger.click();
 
     const initialOptions = Array.from(
-      overlay.querySelectorAll('.grid-ui__pattern-option'),
+      overlay.querySelectorAll('.grid-ui__pattern-option-label'),
       (option) => option.textContent,
     );
 
     expect(initialOptions).toContain('Version 1');
     expect(initialOptions).toContain('Web 12');
-    expect(initialOptions).not.toContain('Rhythm 8');
+    expect(initialOptions).toContain('Rhythm 8');
+    expect(
+      overlay.querySelectorAll('.grid-ui__pattern-option-icon').length,
+    ).toBeGreaterThan(0);
 
     const rowsOption = overlay.querySelector('[data-axis="rows"]') as HTMLButtonElement;
     rowsOption.click();
     patternTrigger.click();
 
     const rowOptions = Array.from(
-      overlay.querySelectorAll('.grid-ui__pattern-option'),
+      overlay.querySelectorAll('.grid-ui__pattern-option-label'),
       (option) => option.textContent,
     );
 
+    expect(rowOptions).toContain('Version 1');
     expect(rowOptions).toContain('Version 2');
     expect(rowOptions).toContain('Rhythm 8');
-    expect(rowOptions).not.toContain('Web 12');
+    expect(rowOptions).toContain('Web 12');
   });
 
   it('applies defaults onto the active variation and can snapshot a new version', async () => {
@@ -209,7 +213,7 @@ describe('pattern picker', () => {
 
     const webTwelve = Array.from(
       overlay.querySelectorAll<HTMLButtonElement>('.grid-ui__pattern-option'),
-    ).find((option) => option.textContent === 'Web 12');
+    ).find((option) => option.querySelector('.grid-ui__pattern-option-label')?.textContent === 'Web 12');
 
     webTwelve?.click();
 

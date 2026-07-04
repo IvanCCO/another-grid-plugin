@@ -412,6 +412,32 @@ export function getPatternsForAxis(
   });
 }
 
+const AXIS_SORT_ORDER: Record<GridAxis, number> = {
+  columns: 0,
+  rows: 1,
+  grid: 2,
+};
+
+function sortPatternsByAxis(patterns: GridPattern[]): GridPattern[] {
+  return [...patterns].sort((left, right) => {
+    const axisDelta = AXIS_SORT_ORDER[left.axis] - AXIS_SORT_ORDER[right.axis];
+    if (axisDelta !== 0) {
+      return axisDelta;
+    }
+
+    return left.name.localeCompare(right.name);
+  });
+}
+
+export function getPatternsByKind(
+  siteState: SiteGridState,
+  kind: GridPatternKind,
+): GridPattern[] {
+  return sortPatternsByAxis(
+    siteState.patterns.filter((pattern) => pattern.kind === kind),
+  );
+}
+
 export function selectPattern(siteState: SiteGridState, patternId: string): SiteGridState {
   if (!siteState.patterns.some((pattern) => pattern.id === patternId)) {
     return siteState;
@@ -525,14 +551,13 @@ export function createVariation(siteState: SiteGridState): SiteGridState {
 export function deleteVariation(
   siteState: SiteGridState,
   patternId: string,
-  axis: GridAxis,
 ): SiteGridState | null {
   const pattern = siteState.patterns.find((entry) => entry.id === patternId);
-  if (!pattern || pattern.kind !== 'variation' || pattern.axis !== axis) {
+  if (!pattern || pattern.kind !== 'variation') {
     return null;
   }
 
-  const axisVariations = getPatternsForAxis(siteState, axis, 'variation');
+  const axisVariations = getPatternsForAxis(siteState, pattern.axis, 'variation');
   if (axisVariations.length <= 1) {
     return null;
   }

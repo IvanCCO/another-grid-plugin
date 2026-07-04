@@ -506,9 +506,13 @@
 .grid-ui__pattern-option {
   position: relative;
   z-index: 0;
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
   width: 100%;
   min-height: 32px;
-  padding: 0 8px 0 4px;
+  padding: 0 8px 0 8px;
   border: 0;
   border-radius: 10px;
   background: transparent;
@@ -520,6 +524,28 @@
   cursor: pointer;
   transition:
     color 160ms ease;
+}
+
+.grid-ui__pattern-option-icon {
+  width: 14px;
+  height: 14px;
+  background: currentColor;
+  mask-image: var(--grid-icon-url);
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  -webkit-mask-image: var(--grid-icon-url);
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  transform: rotate(var(--grid-icon-rotation, 0deg));
+}
+
+.grid-ui__pattern-option-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .grid-ui__pattern-option-list > .grid-ui__pattern-option::before {
@@ -604,7 +630,7 @@
   z-index: 1;
   flex: 1;
   min-width: 0;
-  padding: 0 4px 0 4px;
+  padding: 0 4px 0 8px;
 }
 
 .grid-ui__pattern-delete {
