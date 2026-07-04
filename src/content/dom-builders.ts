@@ -295,16 +295,38 @@ export function createPopoverHeader(): {
   return { header, badge, icon, fallback, title: heading };
 }
 
-export function createPlusIcon(): HTMLSpanElement {
+export function createAddVariationIcon(): HTMLSpanElement {
   const icon = document.createElement('span');
-  icon.className = 'grid-ui__plus-icon';
+  icon.className = 'grid-ui__pattern-action-icon';
   icon.setAttribute('aria-hidden', 'true');
   return icon;
+}
+
+export function renderAddVariationIcon(icon: HTMLSpanElement, axis: GridAxis): void {
+  if (axis === 'grid') {
+    icon.style.setProperty(
+      '--grid-icon-url',
+      `url("${getAssetUrl('grid-2x2-plus.svg')}")`,
+    );
+    icon.style.setProperty('--grid-icon-rotation', '0deg');
+    icon.style.setProperty('--grid-icon-scale-x', '1');
+    return;
+  }
+
+  const isVertical = axis === 'columns';
+
+  icon.style.setProperty(
+    '--grid-icon-url',
+    `url("${getAssetUrl('ruler-horizontal-plus.svg')}")`,
+  );
+  icon.style.setProperty('--grid-icon-rotation', isVertical ? '90deg' : '0deg');
+  icon.style.setProperty('--grid-icon-scale-x', isVertical ? '-1' : '1');
 }
 
 export function createPatternPicker(): {
   field: HTMLDivElement;
   addButton: HTMLButtonElement;
+  addIcon: HTMLSpanElement;
   trigger: HTMLButtonElement;
   triggerLabel: HTMLSpanElement;
   menu: HTMLDivElement;
@@ -322,7 +344,8 @@ export function createPatternPicker(): {
   addButton.type = 'button';
   addButton.className = 'grid-ui__pattern-action';
   addButton.setAttribute('aria-label', 'Create a new variation');
-  addButton.appendChild(createPlusIcon());
+  const addIcon = createAddVariationIcon();
+  addButton.appendChild(addIcon);
 
   const trigger = document.createElement('button');
   trigger.type = 'button';
@@ -361,6 +384,7 @@ export function createPatternPicker(): {
   return {
     field,
     addButton,
+    addIcon,
     trigger,
     triggerLabel,
     menu,
