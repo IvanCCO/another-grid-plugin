@@ -53,9 +53,17 @@ export function getAssetUrl(filename: string): string {
 export function createIcon(filename: string, className: string, rotation = 0): HTMLSpanElement {
   const icon = document.createElement('span');
   icon.className = className;
+  updateIconAppearance(icon, filename, rotation);
+  return icon;
+}
+
+export function updateIconAppearance(
+  icon: HTMLElement,
+  filename: string,
+  rotation = 0,
+): void {
   icon.style.setProperty('--grid-icon-url', `url("${getAssetUrl(filename)}")`);
   icon.style.setProperty('--grid-icon-rotation', `${rotation}deg`);
-  return icon;
 }
 
 export function createButton(

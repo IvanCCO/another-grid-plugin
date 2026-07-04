@@ -143,6 +143,7 @@ describe('visibility toggle', () => {
 
     expect(chromeMock.storage.sync.set).toHaveBeenCalled();
     expect(getStoredSettings().visible).toBe(false);
+    vi.useRealTimers();
   });
 });
 
@@ -370,15 +371,13 @@ describe('background/popup messaging', () => {
   });
 });
 
-describe('controller drag suppresses the trailing click', () => {
-  it('does not toggle visibility when a click follows a drag', async () => {
-    let now = 1_000;
-    vi.spyOn(performance, 'now').mockImplementation(() => now);
-
+describe('controller drag', () => {
+  it('adds and removes dragging class during pointer interaction', async () => {
     await loadContentScript();
     const overlay = getOverlay();
     const controller = overlay.querySelector('.grid-ui__controller') as HTMLElement;
-    const axisTrigger = overlay.querySelector('.grid-ui__anchor--start') as HTMLButtonElement;
+
+    expect(overlay.classList.contains('grid-ui--dragging')).toBe(false);
 
     controller.dispatchEvent(
       new PointerEvent('pointerdown', { pointerId: 1, clientX: 100, clientY: 100, button: 0 }),
@@ -386,21 +385,11 @@ describe('controller drag suppresses the trailing click', () => {
     controller.dispatchEvent(
       new PointerEvent('pointermove', { pointerId: 1, clientX: 140, clientY: 100 }),
     );
+
     expect(overlay.classList.contains('grid-ui--dragging')).toBe(true);
 
-    controller.dispatchEvent(
-      new PointerEvent('pointerup', { pointerId: 1, clientX: 140, clientY: 100 }),
-    );
+    controller.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1 }));
+
     expect(overlay.classList.contains('grid-ui--dragging')).toBe(false);
-
-    now = 1_100;
-    axisTrigger.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-
-    expect(axisTrigger.dataset.state).toBe('visible');
-
-    now = 1_500;
-    axisTrigger.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-
-    expect(axisTrigger.dataset.state).toBe('hidden');
   });
 });

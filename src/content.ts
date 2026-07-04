@@ -35,12 +35,12 @@ import {
   createSection,
   createSliderField,
   bindSliderField,
-  getAssetUrl,
   getAxisOption,
   renderAxisGroup,
   renderDistributionGroup,
   renderPatternPickerMenu,
   updateSliderVisual,
+  updateIconAppearance,
 } from './content/dom-builders';
 import { renderGrid } from './content/grid-render';
 import {
@@ -375,6 +375,7 @@ function ensureOverlayUi(): OverlayUi {
       dragState.moved = true;
       root.classList.add('grid-ui--dragging');
       setActivePopover(null);
+      suppressClickUntil = performance.now() + 220;
     }
 
     event.preventDefault();
@@ -662,21 +663,10 @@ function renderController(settings: GridSettings): void {
   });
   renderAxisGroup(ui.adjustAxisGroup, settings.axis);
   const axisOption = getAxisOption(settings.axis);
-  ui.adjustTriggerIcon.style.setProperty(
-    '--grid-icon-url',
-    `url("${getAssetUrl(axisOption.icon)}")`,
-  );
-  ui.adjustTriggerIcon.style.setProperty(
-    '--grid-icon-rotation',
-    `${axisOption.rotation ?? 0}deg`,
-  );
-  ui.axisTriggerIcon.style.setProperty(
-    '--grid-icon-url',
-    `url("${getAssetUrl(settings.visible ? 'open-eye.svg' : 'closed-eye.svg')}")`,
-  );
-  ui.axisTriggerIcon.style.setProperty(
-    '--grid-icon-rotation',
-    '0deg',
+  updateIconAppearance(ui.adjustTriggerIcon, axisOption.icon, axisOption.rotation ?? 0);
+  updateIconAppearance(
+    ui.axisTriggerIcon,
+    settings.visible ? 'open-eye.svg' : 'closed-eye.svg',
   );
   ui.axisTrigger.setAttribute('aria-label', settings.visible ? 'Hide overlay' : 'Show overlay');
   ui.axisTrigger.dataset.state = settings.visible ? 'visible' : 'hidden';
