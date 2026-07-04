@@ -372,6 +372,9 @@ describe('background/popup messaging', () => {
 
 describe('controller drag suppresses the trailing click', () => {
   it('does not toggle visibility when a click follows a drag', async () => {
+    let now = 1_000;
+    vi.spyOn(performance, 'now').mockImplementation(() => now);
+
     await loadContentScript();
     const overlay = getOverlay();
     const controller = overlay.querySelector('.grid-ui__controller') as HTMLElement;
@@ -385,11 +388,19 @@ describe('controller drag suppresses the trailing click', () => {
     );
     expect(overlay.classList.contains('grid-ui--dragging')).toBe(true);
 
-    controller.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1 }));
+    controller.dispatchEvent(
+      new PointerEvent('pointerup', { pointerId: 1, clientX: 140, clientY: 100 }),
+    );
     expect(overlay.classList.contains('grid-ui--dragging')).toBe(false);
 
+    now = 1_100;
     axisTrigger.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
 
     expect(axisTrigger.dataset.state).toBe('visible');
+
+    now = 1_500;
+    axisTrigger.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+
+    expect(axisTrigger.dataset.state).toBe('hidden');
   });
 });
