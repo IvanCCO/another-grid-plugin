@@ -450,32 +450,18 @@
     transform 180ms var(--grid-ui-ease-out);
 }
 
-.grid-ui__slider-ruler::before,
-.grid-ui__slider-ruler::after {
+.grid-ui__slider-ruler::before {
   content: '';
   position: absolute;
   inset: 0;
   border-radius: inherit;
-}
-
-.grid-ui__slider-ruler::before {
   background:
     repeating-linear-gradient(
       90deg,
-      transparent 0 17px,
-      var(--grid-ui-text) 17px 18px
+      transparent 0 27px,
+      var(--grid-ui-text) 27px 28px
     );
-  opacity: 0.12;
-}
-
-.grid-ui__slider-ruler::after {
-  background:
-    repeating-linear-gradient(
-      90deg,
-      transparent 0 76px,
-      var(--grid-ui-text) 76px 78px
-    );
-  opacity: 0.2;
+  opacity: 0.14;
 }
 
 .grid-ui__slider-handle {
