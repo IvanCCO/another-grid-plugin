@@ -879,7 +879,7 @@
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04)),
     linear-gradient(135deg, var(--grid-ui-slider-fill), var(--grid-ui-slider-sheen));
-  clip-path: inset(0 calc(100% - (var(--slider-percent) * 1%)) 0 0 round 14px);
+  clip-path: inset(0 calc(100% - (var(--slider-percent) * 1%)) 0 0 round 10px);
   transition: clip-path 180ms var(--grid-ui-ease-out);
   z-index: 0;
   pointer-events: none;
@@ -1071,7 +1071,7 @@
 }
 
 .grid-ui__field--slider--compact::before {
-  clip-path: inset(0 calc(100% - (var(--slider-percent) * 1%)) 0 0 round 12px);
+  clip-path: inset(0 calc(100% - (var(--slider-percent) * 1%)) 0 0 round 8px);
 }
 
 .grid-ui__field--slider--compact .grid-ui__slider-ruler {
