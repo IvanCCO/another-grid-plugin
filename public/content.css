@@ -40,9 +40,9 @@
   right: 18px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  min-height: 46px;
-  padding: 6px;
+  gap: 4px;
+  min-height: 40px;
+  padding: 4px;
   border: 1px solid var(--grid-ui-border);
   border-radius: 999px;
   background: var(--grid-ui-bg);
@@ -81,8 +81,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   border-radius: 999px;
   cursor: pointer;
   transition:
@@ -118,8 +118,8 @@
 
 .grid-ui__button-icon,
 .grid-ui__menu-icon {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   background: currentColor;
   mask-image: var(--grid-icon-url);
   mask-repeat: no-repeat;
@@ -134,14 +134,14 @@
 
 .grid-ui__close {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  width: 22px;
-  height: 22px;
+  top: -5px;
+  right: -5px;
+  width: 18px;
+  height: 18px;
   background: rgba(14, 16, 20, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: rgba(255, 255, 255, 0.92);
-  font-size: 13px;
+  font-size: 11px;
   line-height: 1;
   opacity: 0;
   transform: scale(0.92);
