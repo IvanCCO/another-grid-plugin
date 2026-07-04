@@ -3,7 +3,7 @@
 **Source:** `public/content.css`, `src/utils.ts`, `src/content.ts`
 
 ## 1. Visual Theme & Atmosphere
-This interface is a light, frosted utility surface layered directly on top of any webpage. It feels precise, compact, and quietly technical rather than decorative.
+This interface is a light, frosted utility surface layered directly on top of any webpage. It feels precise, compact, and quietly technical rather than decorative. Its color attitude is directly informed by the cover of *Grid Systems in Graphic Design* by Josef Muller-Brockmann: a disciplined field of vivid orange set against dense near-black typography and structure.
 
 The overall aesthetic is minimalist and utilitarian with polished micro-interactions. Rounded geometry, translucent whites, soft shadows, and a restrained orange accent keep the tool visible without overpowering the page it sits on top of.
 
@@ -16,19 +16,19 @@ The overall aesthetic is minimalist and utilitarian with polished micro-interact
   Used for popovers, slider shells, and color swatches.
 - **Soft Ink Border** (`rgba(0, 0, 0, 0.08)`)  
   Used for hairline borders and separators.
-- **Primary Soft Black** (`rgba(28, 28, 30, 0.88)`)  
+- **Primary Soft Black** (`rgba(31, 31, 32, 0.88)`)  
   Used for main text, slider handles, icons, and dark emphasis states.
-- **Muted System Gray** (`rgba(60, 60, 67, 0.55)`)  
+- **Muted System Gray** (`rgba(31, 31, 32, 0.55)`)  
   Used for section headings, hints, lower-emphasis labels, and the slider handle.
 - **Surface Mist** (`rgba(0, 0, 0, 0.04)`)  
   Used for passive button and control backgrounds.
 - **Surface Mist Hover** (`rgba(0, 0, 0, 0.06)`)  
   Used for hover reinforcement on secondary controls.
-- **Signal Orange** (`#FF8A3D`)  
+- **Signal Orange** (`#EC6725`)  
   Used as the core accent for active slider fill and visual emphasis.
-- **Signal Orange Wash** (`rgba(255, 138, 61, 0.18)`)  
+- **Signal Orange Wash** (`rgba(236, 103, 37, 0.18)`)  
   Used for selected pills, active chips, and the slider’s filled region.
-- **Signal Orange Sheen** (`rgba(255, 138, 61, 0.10)`)  
+- **Signal Orange Sheen** (`rgba(236, 103, 37, 0.10)`)  
   Used to soften the active slider gradient and keep the accent airy.
 
 ## 3. Typography Rules
